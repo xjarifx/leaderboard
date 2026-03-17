@@ -11,8 +11,12 @@ function authHeaders() {
 
 async function request(path: string, options: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers ?? {}) },
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+      ...(options.headers as Record<string, string> ?? {}),
+    } as HeadersInit,
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Request failed");
