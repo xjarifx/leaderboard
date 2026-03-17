@@ -65,14 +65,14 @@ export default function LeaderboardPage() {
           <>
             {/* Top 3 podium cards */}
             {top3.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-3 gap-3 mb-4 items-end">
                 {[top3[1], top3[0], top3[2]].map((entry, podiumIdx) => {
                   if (!entry) return <div key={podiumIdx} />;
                   const rank = data.indexOf(entry);
                   const heights = ["h-24", "h-32", "h-20"];
                   return (
                     <div key={entry.celebrity_name} className="flex flex-col items-center gap-2">
-                      <div className={`w-full ${heights[podiumIdx]} rounded-2xl overflow-hidden bg-slate-100 relative shadow-md`}>
+                      <div className={`w-full ${heights[podiumIdx]} rounded-2xl overflow-hidden bg-slate-100 relative shadow-md border-2 ${rank === 0 ? "border-yellow-400" : rank === 1 ? "border-slate-400" : "border-amber-600"}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={entry.sample_url} alt={entry.celebrity_name} className="w-full h-full object-cover" loading="eager" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
