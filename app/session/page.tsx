@@ -27,6 +27,7 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [participant, setParticipant] = useState<{ name: string; student_id: string } | null>(null);
 
   const loadCurrent = useCallback(async (sid: number) => {
     const data = await api.getCurrentImage(sid);
@@ -39,6 +40,10 @@ export default function SessionPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) { router.push("/login"); return; }
+    try {
+      const p = localStorage.getItem("participant");
+      if (p) setParticipant(JSON.parse(p));
+    } catch { /* ignore */ }
     (async () => {
       try {
         const sessions = await api.getSessions();
@@ -126,29 +131,36 @@ export default function SessionPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-8 px-4">
       {/* Top bar */}
       <div className="w-full max-w-md mb-5">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Progress</span>
-            <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
-              {state.current_index + 1} / {state.total}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
+        {/* User info row */}
+        {participant && (
+          <div className="flex items-center gap-2.5 mb-3 bg-white border border-slate-100 rounded-2xl px-4 py-2.5 shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-bold">{participant.name.charAt(0).toUpperCase()}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-800 truncate">{participant.name}</p>
+              <p className="text-xs text-slate-400">{participant.student_id}</p>
+            </div>
             <button
               onClick={() => router.push("/leaderboard")}
-              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+              className="flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm flex-shrink-0"
             >
               🏆 Leaderboard
             </button>
             <button
               onClick={() => { localStorage.clear(); router.push("/login"); }}
-              className="text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+              className="text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-full transition-colors shadow-sm flex-shrink-0"
             >
               Sign out
             </button>
           </div>
+        )}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Progress</span>
+          <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
+            {state.current_index + 1} / {state.total}
+          </span>
         </div>
-        {/* Progress bar */}
         <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
           <div
             className="bg-blue-500 h-full rounded-full transition-all duration-700 ease-out"
