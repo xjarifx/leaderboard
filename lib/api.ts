@@ -4,19 +4,20 @@ function getToken() {
   return typeof window !== "undefined" ? localStorage.getItem("token") : null;
 }
 
-function authHeaders() {
+function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function request(path: string, options: RequestInit = {}) {
+  const { headers: optHeaders, ...rest } = options;
   const res = await fetch(`${BASE}${path}`, {
-    ...options,
+    ...rest,
     headers: {
       "Content-Type": "application/json",
       ...authHeaders(),
-      ...(options.headers as Record<string, string> ?? {}),
-    } as HeadersInit,
+      ...(optHeaders as Record<string, string> | undefined),
+    },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Request failed");
