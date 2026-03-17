@@ -74,7 +74,7 @@ export default function LeaderboardPage() {
                     <div key={entry.celebrity_name} className="flex flex-col items-center gap-2">
                       <div className={`w-full ${heights[podiumIdx]} rounded-2xl overflow-hidden bg-slate-100 relative shadow-md`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={entry.sample_url} alt={entry.celebrity_name} className="w-full h-full object-cover" />
+                        <img src={entry.sample_url} alt={entry.celebrity_name} className="w-full h-full object-cover" loading="eager" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                         <span className="absolute top-2 left-2 text-lg">{MEDAL[rank]}</span>
                         {entry.avg_rating !== null && (
@@ -108,7 +108,7 @@ export default function LeaderboardPage() {
                     {/* Thumbnail */}
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={entry.sample_url} alt={entry.celebrity_name} className="w-full h-full object-cover" />
+                      <img src={entry.sample_url} alt={entry.celebrity_name} className="w-full h-full object-cover" loading="lazy" />
                     </div>
 
                     {/* Info */}
