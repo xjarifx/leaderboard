@@ -1,8 +1,10 @@
 import { Router, Response } from "express";
 import prisma from "../lib/prisma.js";
-import { AuthRequest } from "../middleware/auth.js";
+import { AuthRequest, authenticate } from "../middleware/auth.js";
 
 const router = Router();
+
+router.use(authenticate);
 
 router.get("/:id/current", async (req: AuthRequest, res: Response) => {
   try {

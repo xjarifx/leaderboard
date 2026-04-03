@@ -1,8 +1,10 @@
 import { Router, Response } from "express";
 import prisma from "../lib/prisma.js";
-import { AuthRequest } from "../middleware/auth.js";
+import { AuthRequest, authenticate } from "../middleware/auth.js";
 
 const router = Router();
+
+router.use(authenticate);
 
 router.get("/", async (req: AuthRequest, res: Response) => {
   try {
@@ -58,7 +60,9 @@ router.post("/", async (req: AuthRequest, res: Response) => {
   }
 });
 
-function shuffleNoConsecutive(images: { id: number; celebrity_name: string }[]) {
+function shuffleNoConsecutive(
+  images: { id: number; celebrity_name: string }[],
+) {
   const grouped: Record<string, typeof images> = {};
   for (const img of images) {
     if (!grouped[img.celebrity_name]) {
@@ -71,8 +75,10 @@ function shuffleNoConsecutive(images: { id: number; celebrity_name: string }[]) 
   let lastGroup: string | null = null;
 
   while (Object.values(grouped).some((g) => g.length > 0)) {
-    const groups = Object.keys(grouped).filter((g) => grouped[g].length > 0 && g !== lastGroup);
-    
+    const groups = Object.keys(grouped).filter(
+      (g) => grouped[g].length > 0 && g !== lastGroup,
+    );
+
     if (groups.length === 0) break;
 
     const chosenGroup = groups[Math.floor(Math.random() * groups.length)];
