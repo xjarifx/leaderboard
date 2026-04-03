@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api, Rating } from "../lib/api";
 import { getCurrentSession, logout } from "../lib/auth";
@@ -6,7 +6,9 @@ import { getCurrentSession, logout } from "../lib/auth";
 export default function SessionComplete() {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
+  const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
+  const statusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sessionId = getCurrentSession();
@@ -15,9 +17,16 @@ export default function SessionComplete() {
       return;
     }
 
-    api.getSessionRatings(sessionId)
-      .then(setRatings)
-      .catch(() => navigate("/session"))
+    api
+      .getSessionRatings(sessionId)
+      .then((data) => {
+        setRatings(data);
+        setAnnounce(`Session complete. You rated ${data.length} images.`);
+      })
+      .catch(() => {
+        setAnnounce("Failed to load session results");
+        navigate("/session");
+      })
       .finally(() => setLoading(false));
   }, [navigate]);
 
@@ -28,89 +37,114 @@ export default function SessionComplete() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+      <div className="loading" role="status" aria-live="polite">
+        <div className="loading-spinner" aria-hidden="true" />
+        <span className="sr-only">Loading session results...</span>
       </div>
     );
   }
 
-  const averageRating = ratings.length > 0
-    ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
-    : "0";
+  const averageRating =
+    ratings.length > 0
+      ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
+      : "0";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      <header className="bg-white shadow-sm p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-800">Session Complete</h1>
-          <button
-            onClick={handleLogout}
-            className="text-gray-600 hover:text-gray-800 text-sm"
-          >
-            Sign out
-          </button>
+    <div id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <header className="header" role="banner">
+        <div className="header-title">
+          <h1>Session Complete</h1>
         </div>
+<button onClick={handleLogout} className="btn btn-danger">
+            Sign Out
+          </button>
       </header>
 
-      <main className="max-w-4xl mx-auto w-full p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center mb-8">
-          <div className="text-6xl mb-4">&#127881; &#127882; &#127881;</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Congratulations!
+      <main style={{ flex: 1 }} aria-label="Session results">
+        <div ref={statusRef} className="section" style={{ textAlign: "center" }}>
+          <span className="badge badge-success">Nice Work!</span>
+          <h2 style={{ fontSize: "24px", marginTop: "16px", marginBottom: "8px" }}>
+            Session Complete
           </h2>
-          <p className="text-gray-600 mb-6">
-            You've completed your rating session!
-          </p>
+          <p className="section-subtitle">Your ratings have been recorded</p>
 
-          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-            <div className="bg-blue-50 rounded-xl p-4">
-              <p className="text-4xl font-bold text-blue-600">
+          <div 
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "24px" }}
+            role="region" 
+            aria-label="Session statistics"
+          >
+            <div 
+              style={{ padding: "20px", border: "1px solid var(--border)", background: "var(--bg-hover)" }}
+              aria-label={`${ratings.length} images rated`}
+            >
+              <p style={{ fontSize: "32px", fontWeight: "700", color: "var(--brand)" }}>
                 {ratings.length}
               </p>
-              <p className="text-sm text-gray-600">Images Rated</p>
+              <p style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--text-secondary)", marginTop: "4px" }}>
+                Images Rated
+              </p>
             </div>
-            <div className="bg-green-50 rounded-xl p-4">
-              <p className="text-4xl font-bold text-green-600">
+            <div 
+              style={{ padding: "20px", border: "1px solid var(--border)", background: "var(--bg-hover)" }}
+              aria-label={`Average rating ${averageRating}`}
+            >
+              <p style={{ fontSize: "32px", fontWeight: "700", color: "var(--success)" }}>
                 {averageRating}
               </p>
-              <p className="text-sm text-gray-600">Average Rating</p>
+              <p style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--text-secondary)", marginTop: "4px" }}>
+                Avg Score
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Your Ratings</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="section">
+          <h3 className="section-title" id="ratings-heading">Your Ratings</h3>
+          <p className="section-subtitle">Recap of your scored images</p>
+
+          <div 
+            style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}
+            role="list" 
+            aria-label="Rated images"
+          >
             {ratings.map((rating) => (
-              <div key={rating.id} className="relative">
+              <figure 
+                key={rating.id} 
+                role="listitem"
+                aria-label={`${rating.image.celebrity_name}: rated ${rating.rating} out of 10`}
+                style={{ margin: 0 }}
+              >
                 <img
                   src={rating.image.image_url}
-                  alt={rating.image.celebrity_name}
-                  className="w-full aspect-square object-cover rounded-lg"
+                  alt={`Photo of ${rating.image.celebrity_name}`}
+                  style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-center py-1 rounded-b-lg">
-                  <span className="font-bold">{rating.rating}</span>
-                </div>
-              </div>
+                <figcaption 
+                  style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.7)", padding: "4px", textAlign: "center" }}
+                  aria-hidden="true"
+                >
+                  <span style={{ color: "white", fontSize: "12px", fontWeight: "600" }}>
+                    {rating.rating}
+                  </span>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
 
-        <div className="flex gap-4 justify-center">
-          <Link
-            to="/leaderboard"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition"
-          >
+        <nav style={{ display: "flex", gap: "12px", justifyContent: "center" }} aria-label="Actions">
+          <Link to="/leaderboard" className="btn btn-primary">
             View Leaderboard
           </Link>
-          <button
-            onClick={handleLogout}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition"
-          >
+          <button onClick={handleLogout} className="btn">
             Sign Out
           </button>
-        </div>
+        </nav>
       </main>
+      
+      <div className="sr-only" role="status" aria-live="polite">
+        {announce}
+      </div>
     </div>
   );
 }

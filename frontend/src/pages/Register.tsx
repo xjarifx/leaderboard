@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { setToken, setParticipant } from "../lib/auth";
@@ -10,116 +10,156 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
+  const firstErrorRef = useRef<HTMLDivElement>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      const message = "Passwords do not match";
+      setError(message);
+      setAnnounce(`Error: ${message}`);
+      firstErrorRef.current?.focus();
       return;
     }
 
     setLoading(true);
+    setAnnounce("Creating account...");
 
     try {
       const { token, participant } = await api.register(studentId, name, password);
       setToken(token);
       setParticipant(participant);
+      setAnnounce("Account created. Redirecting...");
       navigate("/session");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      const message = err instanceof Error ? err.message : "Registration failed";
+      setError(message);
+      setAnnounce(`Error: ${message}`);
+      firstErrorRef.current?.focus();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-3xl">&#9733;</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
-          <p className="text-gray-500 mt-2">Join and start rating</p>
-        </div>
+    <div className="auth-container" role="main" aria-labelledby="auth-title">
+      <div className="auth-card">
+        <span className="badge" aria-hidden="true">Join Now</span>
+        <h1 id="auth-title" className="auth-title">Create Account</h1>
+        <p className="auth-subtitle">Fill in your details to get started</p>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+          <div 
+            ref={firstErrorRef}
+            className="error-box" 
+            role="alert" 
+            aria-live="assertive"
+            tabIndex={-1}
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label htmlFor="studentId" className="label label-required">
               Student ID
             </label>
             <input
+              ref={firstInputRef}
+              id="studentId"
               type="text"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Enter your student ID"
               required
+              aria-required="true"
+              autoComplete="username"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="form-group">
+            <label htmlFor="name" className="label label-required">
               Full Name
             </label>
             <input
+              id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Enter your full name"
               required
+              aria-required="true"
+              autoComplete="name"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="form-group">
+            <label htmlFor="password" className="label label-required">
               Password
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Create a password"
               required
+              aria-required="true"
+              autoComplete="new-password"
+              minLength={6}
+              aria-describedby="password-hint"
             />
+            <span id="password-hint" className="sr-only">
+              Must be at least 6 characters
+            </span>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="label label-required">
               Confirm Password
             </label>
             <input
+              id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Confirm your password"
               required
+              aria-required="true"
+              autoComplete="new-password"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
+            className="btn btn-primary"
+            style={{ width: "100%", marginTop: "8px" }}
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600">
+        <p className="auth-footer">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
+          <Link to="/login" className="auth-link">
             Sign in
           </Link>
         </p>
+      </div>
+      
+      <div className="sr-only" role="status" aria-live="polite">
+        {announce}
       </div>
     </div>
   );

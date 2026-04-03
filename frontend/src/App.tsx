@@ -14,8 +14,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const isAuthenticated = Boolean(getToken());
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="page-container">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -43,7 +46,12 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route
+          path="/"
+          element={
+            <Navigate to={isAuthenticated ? "/session" : "/login"} replace />
+          }
+        />
       </Routes>
     </div>
   );

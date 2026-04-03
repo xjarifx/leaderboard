@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { setToken, setParticipant } from "../lib/auth";
@@ -8,84 +8,116 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
+  const firstErrorRef = useRef<HTMLDivElement>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    setAnnounce("Signing in...");
 
     try {
       const { token, participant } = await api.login(studentId, password);
       setToken(token);
       setParticipant(participant);
+      setAnnounce("Login successful. Redirecting...");
       navigate("/session");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      setAnnounce(`Error: ${message}`);
+      firstErrorRef.current?.focus();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-3xl">&#9733;</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
-          <p className="text-gray-500 mt-2">Sign in to continue rating</p>
-        </div>
+    <div className="auth-container" role="main" aria-labelledby="auth-title">
+      <div className="auth-card">
+        <span className="badge" aria-hidden="true">Welcome Back</span>
+        <h1 id="auth-title" className="auth-title">Sign In</h1>
+        <p className="auth-subtitle">Enter your credentials to continue</p>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+          <div 
+            ref={firstErrorRef}
+            className="error-box" 
+            role="alert" 
+            aria-live="assertive"
+            tabIndex={-1}
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label htmlFor="studentId" className="label label-required">
               Student ID
             </label>
             <input
+              ref={firstInputRef}
+              id="studentId"
               type="text"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Enter your student ID"
               required
+              aria-required="true"
+              autoComplete="username"
+              autoFocus
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="form-group">
+            <label htmlFor="password" className="label label-required">
               Password
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Enter your password"
               required
+              aria-required="true"
+              autoComplete="current-password"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
+            className="btn btn-primary"
+            style={{ width: "100%", marginTop: "8px" }}
+            aria-describedby={loading ? "submit-status" : undefined}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+          
+          {loading && (
+            <span id="submit-status" className="sr-only">
+              Signing in, please wait
+            </span>
+          )}
         </form>
 
-        <p className="text-center mt-6 text-gray-600">
+        <p className="auth-footer">
           Don't have an account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
-            Register
+          <Link to="/register" className="auth-link">
+            Create one
           </Link>
         </p>
+      </div>
+      
+      <div className="sr-only" role="status" aria-live="polite">
+        {announce}
       </div>
     </div>
   );
