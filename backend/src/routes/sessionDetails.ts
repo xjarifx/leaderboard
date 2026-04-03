@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/:id/current", async (req: AuthRequest, res: Response) => {
   try {
-    const sessionId = parseInt(req.params.id);
+    const sessionId = parseInt(req.params.id as string);
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
@@ -58,7 +58,7 @@ router.get("/:id/current", async (req: AuthRequest, res: Response) => {
 
 router.post("/:id/rate", async (req: AuthRequest, res: Response) => {
   try {
-    const sessionId = parseInt(req.params.id);
+    const sessionId = parseInt(req.params.id as string);
     const { rating, image_id } = req.body;
 
     if (!rating || rating < 1 || rating > 10) {
@@ -115,7 +115,7 @@ router.post("/:id/rate", async (req: AuthRequest, res: Response) => {
 
 router.get("/:id/ratings", async (req: AuthRequest, res: Response) => {
   try {
-    const sessionId = parseInt(req.params.id);
+    const sessionId = parseInt(req.params.id as string);
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },

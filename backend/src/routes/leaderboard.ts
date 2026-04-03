@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { AuthRequest, authenticate } from "../middleware/auth.js";
 
@@ -13,15 +13,15 @@ router.get("/", authenticate, async (_req: AuthRequest, res: Response) => {
       orderBy: { _avg: { rating: "desc" } },
     });
 
-    const imageIds = leaderboard.map((entry) => entry.image_id);
+    const imageIds = leaderboard.map((entry: { image_id: number }) => entry.image_id);
 
     const images = await prisma.image.findMany({
       where: { id: { in: imageIds } },
     });
 
-    const imageMap = new Map(images.map((img) => [img.id, img]));
+    const imageMap = new Map(images.map((img: { id: number; celebrity_name: string; image_url: string }) => [img.id, img]));
 
-    const result = leaderboard.map((entry) => {
+    const result = leaderboard.map((entry: { image_id: number; _avg: { rating: number | null }; _count: { rating: number } }) => {
       const image = imageMap.get(entry.image_id)!;
       return {
         image_id: entry.image_id,
