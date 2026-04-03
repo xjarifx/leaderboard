@@ -203,60 +203,64 @@ export default function Session() {
           </div>
         </div>
 
-        {currentImage && (
-          <div className="section" style={{ padding: 0, overflow: "hidden" }}>
-            <img
-              src={currentImage.image_url}
-              alt={`Photo of ${currentImage.celebrity_name}`}
-              style={{ width: "100%", display: "block" }}
-            />
-            <div style={{ padding: "16px", textAlign: "center" }}>
-              <h2 style={{ fontSize: "18px" }}>{currentImage.celebrity_name}</h2>
+        <div className="rating-layout">
+          {currentImage && (
+            <div className="section image-section" style={{ padding: 0, overflow: "hidden" }}>
+              <img
+                src={currentImage.image_url}
+                alt={`Photo of ${currentImage.celebrity_name}`}
+                style={{ width: "100%", display: "block" }}
+              />
+              <div style={{ padding: "16px", textAlign: "center" }}>
+                <h2 style={{ fontSize: "18px" }}>{currentImage.celebrity_name}</h2>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="section">
-          <h3 className="section-title" id="rating-heading">Rate This Person</h3>
-          <p className="section-subtitle">Drag to select a score</p>
+          <div className="section rating-section">
+            <h3 className="section-title" id="rating-heading">Rate This Person</h3>
+            <p className="section-subtitle">Drag to select a score</p>
 
-          <div className="slider-container">
-            <input
-              ref={sliderRef}
-              type="range"
-              min="1"
-              max="10"
-              value={selectedRating}
-              onChange={handleSliderChange}
-              className="simple-slider"
-              aria-label={`Rating: ${selectedRating} out of 10`}
-              aria-valuemin={1}
-              aria-valuemax={10}
-              aria-valuenow={selectedRating}
-            />
-            
-            <div className="slider-value-display" aria-live="polite">
-              <span className="slider-number">{selectedRating}</span>
-              <span className="slider-label">{getRatingLabel(selectedRating)}</span>
+            <div className="slider-container">
+              <input
+                ref={sliderRef}
+                type="range"
+                min="1"
+                max="10"
+                value={selectedRating}
+                onChange={handleSliderChange}
+                className="simple-slider"
+                aria-label={`Rating: ${selectedRating} out of 10`}
+                aria-valuemin={1}
+                aria-valuemax={10}
+                aria-valuenow={selectedRating}
+              />
+              
+              <div className="slider-value-display" aria-live="polite">
+                <span className="slider-number">{selectedRating}</span>
+                <span className="slider-label">{getRatingLabel(selectedRating)}</span>
+              </div>
             </div>
           </div>
         </div>
       </main>
 
       <div className="fixed-bottom">
-        <button
-          ref={submitButtonRef}
-          onClick={() => handleRate(selectedRating)}
-          disabled={submitting}
-          className="btn btn-primary"
-          style={{ width: "100%" }}
-          aria-describedby="submit-desc"
-        >
-          {submitting ? "Submitting..." : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
-        </button>
-        <span id="submit-desc" className="sr-only">
-          Submit your rating of {selectedRating} for {currentImage?.celebrity_name}
-        </span>
+        <div className="submit-container">
+          <button
+            ref={submitButtonRef}
+            onClick={() => handleRate(selectedRating)}
+            disabled={submitting}
+            className="btn btn-primary"
+            style={{ width: "100%" }}
+            aria-describedby="submit-desc"
+          >
+            {submitting ? "Submitting..." : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
+          </button>
+          <span id="submit-desc" className="sr-only">
+            Submit your rating of {selectedRating} for {currentImage?.celebrity_name}
+          </span>
+        </div>
       </div>
 
       {showBreakModal && (
