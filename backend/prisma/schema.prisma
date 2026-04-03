@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Image {
+  id             Int            @id @default(autoincrement())
+  celebrity_name String
+  image_url      String
+  session_queue  SessionQueue[]
+  ratings        Rating[]
+}
+
+model Participant {
+  id         Int       @id @default(autoincrement())
+  student_id String    @unique
+  name       String
+  password   String
+  sessions   Session[]
+}
+
+model Session {
+  id             Int            @id @default(autoincrement())
+  participant_id Int
+  current_index  Int            @default(0)
+  is_completed   Boolean        @default(false)
+  participant    Participant    @relation(fields: [participant_id], references: [id])
+  session_queue  SessionQueue[]
+  ratings        Rating[]
+}
+
+model SessionQueue {
+  id          Int     @id @default(autoincrement())
+  session_id  Int
+  image_id    Int
+  order_index Int
+  session     Session @relation(fields: [session_id], references: [id])
+  image       Image   @relation(fields: [image_id], references: [id])
+}
+
+model Rating {
+  id         Int     @id @default(autoincrement())
+  session_id Int
+  image_id   Int
+  rating     Int
+  session    Session @relation(fields: [session_id], references: [id])
+  image      Image   @relation(fields: [image_id], references: [id])
+
+  @@unique([session_id, image_id])
+}

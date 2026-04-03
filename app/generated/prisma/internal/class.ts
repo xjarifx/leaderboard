@@ -17,8 +17,8 @@ import type * as Prisma from "./prismaNamespace"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.5.0",
-  "engineVersion": "280c870be64f457428992c43c1f6d557fab6e29e",
+  "clientVersion": "7.6.0",
+  "engineVersion": "75cbdc1eb7150937890ad5465d861175c6624711",
   "activeProvider": "postgresql",
   "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Image {\n  id             Int            @id @default(autoincrement())\n  celebrity_name String\n  image_url      String\n  session_queue  SessionQueue[]\n  ratings        Rating[]\n}\n\nmodel Participant {\n  id         Int       @id @default(autoincrement())\n  student_id String    @unique\n  name       String\n  password   String\n  sessions   Session[]\n}\n\nmodel Session {\n  id             Int            @id @default(autoincrement())\n  participant_id Int\n  current_index  Int            @default(0)\n  is_completed   Boolean        @default(false)\n  participant    Participant    @relation(fields: [participant_id], references: [id])\n  session_queue  SessionQueue[]\n  ratings        Rating[]\n}\n\nmodel SessionQueue {\n  id          Int     @id @default(autoincrement())\n  session_id  Int\n  image_id    Int\n  order_index Int\n  session     Session @relation(fields: [session_id], references: [id])\n  image       Image   @relation(fields: [image_id], references: [id])\n}\n\nmodel Rating {\n  id         Int     @id @default(autoincrement())\n  session_id Int\n  image_id   Int\n  rating     Int\n  session    Session @relation(fields: [session_id], references: [id])\n  image      Image   @relation(fields: [image_id], references: [id])\n\n  @@unique([session_id, image_id])\n}\n",
   "runtimeDataModel": {
