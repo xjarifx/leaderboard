@@ -82,7 +82,7 @@ export default function Leaderboard() {
                   const entry = entries[idx];
                   return (
                     <article 
-                      key={entry.image_id} 
+                      key={entry.celebrity_name} 
                       className="top-item"
                       role="listitem"
                       aria-label={`Rank ${idx + 1}: ${entry.celebrity_name}, average rating ${entry.average_rating.toFixed(1)} from ${entry.rating_count} ratings`}
@@ -141,7 +141,7 @@ export default function Leaderboard() {
               </thead>
               <tbody>
                 {entries.map((entry, idx) => (
-                  <tr key={entry.image_id}>
+                  <tr key={entry.celebrity_name}>
                     <td>
                       <span 
                         className={`rank-badge ${getRankClass(idx + 1)}`}

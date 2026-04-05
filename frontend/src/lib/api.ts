@@ -55,7 +55,6 @@ export interface Rating {
 }
 
 export interface LeaderboardEntry {
-  image_id: number;
   celebrity_name: string;
   image_url: string;
   average_rating: number;

@@ -6,31 +6,33 @@ const router = Router();
 
 router.get("/", authenticate, async (_req: AuthRequest, res: Response) => {
   try {
-    const leaderboard = await prisma.rating.groupBy({
-      by: ["image_id"],
-      _avg: { rating: true },
-      _count: { rating: true },
-      orderBy: { _avg: { rating: "desc" } },
+    const ratings = await prisma.rating.findMany({
+      include: {
+        image: true,
+      },
     });
 
-    const imageIds = leaderboard.map((entry: { image_id: number }) => entry.image_id);
+    const personStats = new Map<string, { totalRating: number; count: number; imageUrls: string[] }>();
 
-    const images = await prisma.image.findMany({
-      where: { id: { in: imageIds } },
-    });
+    for (const rating of ratings) {
+      const name = rating.image.celebrity_name;
+      const existing = personStats.get(name) || { totalRating: 0, count: 0, imageUrls: [] };
+      existing.totalRating += rating.rating;
+      existing.count += 1;
+      if (!existing.imageUrls.includes(rating.image.image_url)) {
+        existing.imageUrls.push(rating.image.image_url);
+      }
+      personStats.set(name, existing);
+    }
 
-    const imageMap = new Map(images.map((img: { id: number; celebrity_name: string; image_url: string }) => [img.id, img]));
+    const result = Array.from(personStats.entries()).map(([celebrity_name, stats]) => ({
+      celebrity_name,
+      image_url: stats.imageUrls[0],
+      average_rating: stats.count > 0 ? stats.totalRating / stats.count : 0,
+      rating_count: stats.count,
+    }));
 
-    const result = leaderboard.map((entry: { image_id: number; _avg: { rating: number | null }; _count: { rating: number } }) => {
-      const image = imageMap.get(entry.image_id)!;
-      return {
-        image_id: entry.image_id,
-        celebrity_name: image.celebrity_name,
-        image_url: image.image_url,
-        average_rating: entry._avg.rating,
-        rating_count: entry._count.rating,
-      };
-    });
+    result.sort((a, b) => b.average_rating - a.average_rating);
 
     res.json(result);
   } catch (error) {
