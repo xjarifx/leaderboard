@@ -1,15 +1,20 @@
-const API_ORIGIN = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "");
+const API_ORIGIN = (
+  import.meta.env.VITE_API_URL as string | undefined
+)?.replace(/\/$/, "");
 const API_BASE = API_ORIGIN ? `${API_ORIGIN}/api` : "/api";
 
 function getToken() {
   return localStorage.getItem("token");
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -21,7 +26,9 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Request failed" }));
+    const error = await response
+      .json()
+      .catch(() => ({ error: "Request failed" }));
     throw new Error(error.error || "Request failed");
   }
 
@@ -88,12 +95,16 @@ export const api = {
     }>(`/sessions/${sessionId}/current`),
 
   rateImage: (sessionId: number, image_id: number, rating: number) =>
-    request<{ success: boolean; completed: boolean }>(`/sessions/${sessionId}/rate`, {
-      method: "POST",
-      body: JSON.stringify({ image_id, rating }),
-    }),
+    request<{ success: boolean; completed: boolean }>(
+      `/sessions/${sessionId}/rate`,
+      {
+        method: "POST",
+        body: JSON.stringify({ image_id, rating }),
+      },
+    ),
 
-  getSessionRatings: (sessionId: number) => request<Rating[]>(`/sessions/${sessionId}/ratings`),
+  getSessionRatings: (sessionId: number) =>
+    request<Rating[]>(`/sessions/${sessionId}/ratings`),
 
   getLeaderboard: () => request<LeaderboardEntry[]>("/leaderboard"),
 
