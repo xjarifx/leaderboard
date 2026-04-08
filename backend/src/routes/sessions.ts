@@ -75,9 +75,13 @@ function shuffleNoConsecutive(
   let lastGroup: string | null = null;
 
   while (Object.values(grouped).some((g) => g.length > 0)) {
-    const groups = Object.keys(grouped).filter(
+    let groups = Object.keys(grouped).filter(
       (g) => grouped[g].length > 0 && g !== lastGroup,
     );
+
+    if (groups.length === 0) {
+      groups = Object.keys(grouped).filter((g) => grouped[g].length > 0);
+    }
 
     if (groups.length === 0) break;
 

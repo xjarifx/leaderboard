@@ -35,7 +35,12 @@
 body {
   min-height: 100vh;
   color: var(--text-primary);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   background: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
 }
@@ -44,7 +49,12 @@ body {
   min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -380,7 +390,7 @@ h1, h2, h3, h4, h5, h6 {
   .image-section {
     order: 1;
   }
-  
+
   .rating-section {
     order: 2;
     position: sticky;
@@ -427,7 +437,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .list-item {
@@ -582,6 +594,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 16px;
   background: var(--bg-card);
   border-top: 1px solid var(--border);
+  z-index: 20;
 }
 
 @media (min-width: 1024px) {
@@ -595,6 +608,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .submit-container {
   max-width: 100%;
+  width: 100%;
 }
 
 @media (min-width: 1024px) {

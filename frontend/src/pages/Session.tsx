@@ -30,7 +30,7 @@ export default function Session() {
       try {
         const sessions = await api.getSessions();
         const incomplete = sessions.find(
-          (s: { is_completed: boolean }) => !s.is_completed
+          (s: { is_completed: boolean }) => !s.is_completed,
         );
         if (incomplete) {
           sessionId = incomplete.id;
@@ -50,7 +50,7 @@ export default function Session() {
         alert(
           err instanceof Error
             ? err.message
-            : "Failed to create session. Add images first."
+            : "Failed to create session. Add images first.",
         );
         return;
       }
@@ -161,10 +161,15 @@ export default function Session() {
   }
 
   return (
-    <div id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div
+      id="main-content"
+      style={{ flex: 1, display: "flex", flexDirection: "column" }}
+    >
       <header className="header" role="banner">
         <div className="header-title">
-          <span className="badge" aria-hidden="true">Active Session</span>
+          <span className="badge" aria-hidden="true">
+            Active Session
+          </span>
           <h1>{participant?.name}</h1>
           <p>ID: {participant?.student_id}</p>
         </div>
@@ -178,19 +183,30 @@ export default function Session() {
         </nav>
       </header>
 
-      <main style={{ flex: 1, paddingBottom: "80px" }} aria-label="Rating session">
+      <main
+        style={{ flex: 1, paddingBottom: "80px" }}
+        aria-label="Rating session"
+      >
         <div className="section" role="status" aria-live="polite">
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-            <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Progress</span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "8px",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+              Progress
+            </span>
             <span style={{ fontSize: "13px", fontWeight: "600" }}>
               {progress.current} of {progress.total}
             </span>
           </div>
-          <div 
-            className="progress-bar" 
-            role="progressbar" 
-            aria-valuenow={progress.current} 
-            aria-valuemin={0} 
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuenow={progress.current}
+            aria-valuemin={0}
             aria-valuemax={progress.total}
             aria-label="Session progress"
           >
@@ -205,20 +221,27 @@ export default function Session() {
 
         <div className="rating-layout">
           {currentImage && (
-            <div className="section image-section" style={{ padding: 0, overflow: "hidden" }}>
+            <div
+              className="section image-section"
+              style={{ padding: 0, overflow: "hidden" }}
+            >
               <img
                 src={currentImage.image_url}
                 alt={`Photo of ${currentImage.celebrity_name}`}
                 style={{ width: "100%", display: "block" }}
               />
               <div style={{ padding: "16px", textAlign: "center" }}>
-                <h2 style={{ fontSize: "18px" }}>{currentImage.celebrity_name}</h2>
+                <h2 style={{ fontSize: "18px" }}>
+                  {currentImage.celebrity_name}
+                </h2>
               </div>
             </div>
           )}
 
           <div className="section rating-section">
-            <h3 className="section-title" id="rating-heading">Rate This Person</h3>
+            <h3 className="section-title" id="rating-heading">
+              Rate This Person
+            </h3>
             <p className="section-subtitle">Drag to select a score</p>
 
             <div className="slider-container">
@@ -235,44 +258,53 @@ export default function Session() {
                 aria-valuemax={10}
                 aria-valuenow={selectedRating}
               />
-              
+
               <div className="slider-value-display" aria-live="polite">
                 <span className="slider-number">{selectedRating}</span>
-                <span className="slider-label">{getRatingLabel(selectedRating)}</span>
+                <span className="slider-label">
+                  {getRatingLabel(selectedRating)}
+                </span>
+              </div>
+            </div>
+
+            <div className="fixed-bottom">
+              <div className="submit-container">
+                <button
+                  ref={submitButtonRef}
+                  onClick={() => handleRate(selectedRating)}
+                  disabled={submitting}
+                  className="btn btn-primary"
+                  style={{ width: "100%" }}
+                  aria-describedby="submit-desc"
+                >
+                  {submitting
+                    ? "Submitting..."
+                    : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
+                </button>
+                <span id="submit-desc" className="sr-only">
+                  Submit your rating of {selectedRating} for{" "}
+                  {currentImage?.celebrity_name}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      <div className="fixed-bottom">
-        <div className="submit-container">
-          <button
-            ref={submitButtonRef}
-            onClick={() => handleRate(selectedRating)}
-            disabled={submitting}
-            className="btn btn-primary"
-            style={{ width: "100%" }}
-            aria-describedby="submit-desc"
-          >
-            {submitting ? "Submitting..." : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
-          </button>
-          <span id="submit-desc" className="sr-only">
-            Submit your rating of {selectedRating} for {currentImage?.celebrity_name}
-          </span>
-        </div>
-      </div>
-
       {showBreakModal && (
-        <div 
-          className="modal-overlay" 
-          role="dialog" 
-          aria-modal="true" 
+        <div
+          className="modal-overlay"
+          role="dialog"
+          aria-modal="true"
           aria-labelledby="break-title"
         >
           <div className="modal">
-            <span className="badge" aria-hidden="true">Take a Break</span>
-            <h2 id="break-title" className="modal-title">You've rated {ratedCount} images</h2>
+            <span className="badge" aria-hidden="true">
+              Take a Break
+            </span>
+            <h2 id="break-title" className="modal-title">
+              You've rated {ratedCount} images
+            </h2>
             <p className="modal-text">Take a moment to rest your eyes</p>
             <div className="modal-timer" aria-live="polite" aria-atomic="true">
               {formatTime(breakTimeLeft)}
@@ -290,7 +322,7 @@ export default function Session() {
           </div>
         </div>
       )}
-      
+
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
