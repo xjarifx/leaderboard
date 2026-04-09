@@ -19,6 +19,47 @@ const imageKit = new ImageKit({
   urlEndpoint: IMAGEKIT_URL_ENDPOINT,
 });
 
+async function deleteImageKitFolder() {
+  console.log("Deleting existing images from ImageKit...");
+
+  const foldersToCheck = ["/leaderboard", "/"];
+
+  for (const folder of foldersToCheck) {
+    console.log(`Checking folder: ${folder}`);
+    let hasMore = true;
+    let skip = 0;
+    const limit = 100;
+
+    while (hasMore) {
+      try {
+        const result = await imageKit.listFiles({
+          folder: folder,
+          limit: limit,
+          skip: skip,
+        });
+
+        if (result.length === 0) {
+          hasMore = false;
+        } else {
+          for (const file of result) {
+            await imageKit.deleteFile(file.fileId);
+            console.log(`Deleted: ${file.name}`);
+          }
+          skip += limit;
+          if (result.length < limit) {
+            hasMore = false;
+          }
+        }
+      } catch (error) {
+        console.log(`Error listing files in ${folder}:`, error);
+        hasMore = false;
+      }
+    }
+  }
+
+  console.log("ImageKit cleared.");
+}
+
 async function uploadImage(filePath: string, fileName: string) {
   const fileBuffer = fs.readFileSync(filePath);
   const base64 = fileBuffer.toString("base64");
@@ -33,7 +74,7 @@ async function uploadImage(filePath: string, fileName: string) {
 }
 
 function extractCelebrityName(fileName: string): string {
-  return fileName.replace(/_crop\.png$/, "").replace(/_/g, " ");
+  return fileName.replace(/\.png$/, "");
 }
 
 const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGGHJKLMNPQRSTUVWXYZ23456789";
@@ -51,6 +92,9 @@ function generateUniqueIndex(usedIndices: Set<string>): string {
 }
 
 async function main() {
+  console.log("Deleting existing images from ImageKit...");
+  await deleteImageKitFolder();
+
   console.log("Resetting database...");
 
   await prisma.rating.deleteMany();
