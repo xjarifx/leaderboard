@@ -227,12 +227,12 @@ export default function Session() {
             >
               <img
                 src={currentImage.image_url}
-                alt={`Photo of ${currentImage.celebrity_name}`}
+                alt={`Image ${progress.current}`}
                 style={{ width: "100%", display: "block" }}
               />
               <div style={{ padding: "16px", textAlign: "center" }}>
                 <h2 style={{ fontSize: "18px" }}>
-                  {currentImage.celebrity_name}
+                  Image #{progress.current}
                 </h2>
               </div>
             </div>
@@ -282,8 +282,7 @@ export default function Session() {
                     : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
                 </button>
                 <span id="submit-desc" className="sr-only">
-                  Submit your rating of {selectedRating} for{" "}
-                  {currentImage?.celebrity_name}
+                  Submit your rating of {selectedRating} for image {progress.current}
                 </span>
               </div>
             </div>

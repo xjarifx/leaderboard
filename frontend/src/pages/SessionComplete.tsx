@@ -107,16 +107,16 @@ export default function SessionComplete() {
             role="list" 
             aria-label="Rated images"
           >
-            {ratings.map((rating) => (
+            {ratings.map((rating, idx) => (
               <figure 
                 key={rating.id} 
                 role="listitem"
-                aria-label={`${rating.image.celebrity_name}: rated ${rating.rating} out of 10`}
+                aria-label={`Image ${idx + 1}: rated ${rating.rating} out of 10`}
                 style={{ margin: 0 }}
               >
                 <img
                   src={rating.image.image_url}
-                  alt={`Photo of ${rating.image.celebrity_name}`}
+                  alt={`Image ${idx + 1}`}
                   style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
                 />
                 <figcaption 
