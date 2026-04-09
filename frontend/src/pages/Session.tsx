@@ -232,7 +232,7 @@ export default function Session() {
               />
               <div style={{ padding: "16px", textAlign: "center" }}>
                 <h2 style={{ fontSize: "18px" }}>
-                  Image #{progress.current}
+                  {currentImage.image_index}
                 </h2>
               </div>
             </div>

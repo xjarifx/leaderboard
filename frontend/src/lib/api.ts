@@ -43,6 +43,7 @@ export interface Participant {
 
 export interface Image {
   id: number;
+  image_index: string;
   celebrity_name: string;
   image_url: string;
 }
@@ -64,6 +65,7 @@ export interface Rating {
 
 export interface LeaderboardEntry {
   celebrity_name: string;
+  image_index: string;
   image_url: string;
   average_rating: number;
   rating_count: number;

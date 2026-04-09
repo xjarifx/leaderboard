@@ -4,6 +4,22 @@ import { AuthRequest, authenticate } from "../middleware/auth.js";
 
 const router = Router();
 
+const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
+
+async function generateUniqueIndex(prismaClient: typeof prisma): Promise<string> {
+  let index: string;
+  let exists = true;
+  do {
+    index = "";
+    for (let i = 0; i < 4; i++) {
+      index += CHARS[Math.floor(Math.random() * CHARS.length)];
+    }
+    const existing = await prismaClient.image.findUnique({ where: { image_index: index } });
+    exists = !!existing;
+  } while (exists);
+  return index;
+}
+
 router.get("/", authenticate, async (_req: AuthRequest, res: Response) => {
   try {
     const images = await prisma.image.findMany({
@@ -24,8 +40,10 @@ router.post("/", authenticate, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "celebrity_name and image_url are required" });
     }
 
+    const imageIndex = await generateUniqueIndex(prisma);
+
     const image = await prisma.image.create({
-      data: { celebrity_name, image_url },
+      data: { image_index: imageIndex, celebrity_name, image_url },
     });
 
     res.json(image);

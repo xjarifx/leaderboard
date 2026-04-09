@@ -8,6 +8,7 @@ datasource db {
 
 model Image {
   id             Int            @id @default(autoincrement())
+  image_index    String         @unique
   celebrity_name String
   image_url      String
   session_queue  SessionQueue[]

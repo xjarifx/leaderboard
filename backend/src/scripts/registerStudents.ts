@@ -45,7 +45,8 @@ async function main() {
       });
       console.log("Registered:", s.name);
     } catch (e) {
-      console.log("Error:", s.name, e.message);
+      const err = e instanceof Error ? e : new Error(String(e));
+      console.log("Error:", s.name, err.message);
     }
   }
 }

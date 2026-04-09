@@ -12,11 +12,11 @@ router.get("/", authenticate, async (_req: AuthRequest, res: Response) => {
       },
     });
 
-    const personStats = new Map<string, { totalRating: number; count: number; imageUrls: string[] }>();
+    const personStats = new Map<string, { totalRating: number; count: number; imageUrls: string[]; imageIndex: string }>();
 
     for (const rating of ratings) {
       const name = rating.image.celebrity_name;
-      const existing = personStats.get(name) || { totalRating: 0, count: 0, imageUrls: [] };
+      const existing = personStats.get(name) || { totalRating: 0, count: 0, imageUrls: [], imageIndex: rating.image.image_index };
       existing.totalRating += rating.rating;
       existing.count += 1;
       if (!existing.imageUrls.includes(rating.image.image_url)) {
@@ -27,6 +27,7 @@ router.get("/", authenticate, async (_req: AuthRequest, res: Response) => {
 
     const result = Array.from(personStats.entries()).map(([celebrity_name, stats]) => ({
       celebrity_name,
+      image_index: stats.imageIndex,
       image_url: stats.imageUrls[0],
       average_rating: stats.count > 0 ? stats.totalRating / stats.count : 0,
       rating_count: stats.count,

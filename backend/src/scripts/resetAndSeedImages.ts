@@ -36,6 +36,20 @@ function extractCelebrityName(fileName: string): string {
   return fileName.replace(/_crop\.png$/, "").replace(/_/g, " ");
 }
 
+const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGGHJKLMNPQRSTUVWXYZ23456789";
+
+function generateUniqueIndex(usedIndices: Set<string>): string {
+  let index: string;
+  do {
+    index = "";
+    for (let i = 0; i < 4; i++) {
+      index += CHARS[Math.floor(Math.random() * CHARS.length)];
+    }
+  } while (usedIndices.has(index));
+  usedIndices.add(index);
+  return index;
+}
+
 async function main() {
   console.log("Resetting database...");
 
@@ -51,18 +65,22 @@ async function main() {
 
   console.log(`Found ${files.length} images`);
 
+  const usedIndices = new Set<string>();
+
   for (const file of files) {
     const filePath = path.join(imagesDir, file);
     const celebrityName = extractCelebrityName(file);
+    const imageIndex = generateUniqueIndex(usedIndices);
 
     console.log(`Uploading ${file}...`);
 
     const url = await uploadImage(filePath, file);
 
-    console.log(`Storing ${celebrityName} in database...`);
+    console.log(`Storing ${celebrityName} (${imageIndex}) in database...`);
 
     await prisma.image.create({
       data: {
+        image_index: imageIndex,
         celebrity_name: celebrityName,
         image_url: url,
       },

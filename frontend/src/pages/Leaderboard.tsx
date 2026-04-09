@@ -93,6 +93,9 @@ export default function Leaderboard() {
                         className="top-item-image"
                       />
                       <div className="top-item-content">
+                        <div style={{ fontSize: "14px", fontFamily: "monospace", color: "var(--text-secondary)" }}>
+                          {entry.image_index}
+                        </div>
                         <div 
                           className={`rank-badge ${getRankClass(idx + 1)}`} 
                           style={{ marginBottom: "8px", display: "inline-flex" }}
@@ -133,6 +136,7 @@ export default function Leaderboard() {
               <thead>
                 <tr>
                   <th scope="col">Rank</th>
+                  <th scope="col">Index</th>
                   <th scope="col">Image</th>
                   <th scope="col">Ratings</th>
                   <th scope="col">Avg Score</th>
@@ -147,6 +151,11 @@ export default function Leaderboard() {
                         aria-label={`Rank ${idx + 1}`}
                       >
                         {idx + 1}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="rank-badge" style={{ fontFamily: "monospace" }}>
+                        {entry.image_index}
                       </span>
                     </td>
                     <td>
