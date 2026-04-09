@@ -77,7 +77,7 @@ export default function Leaderboard() {
               <h2 className="section-title" id="top3-heading">Top 3</h2>
               <p className="section-subtitle">Highest average scores</p>
 
-              <div className="top-grid" role="list" aria-label="Top 3 celebrities">
+              <div className="top-grid" role="list" aria-label="Top 3">
                 {[0, 1, 2].map((idx) => {
                   const entry = entries[idx];
                   return (
@@ -85,11 +85,11 @@ export default function Leaderboard() {
                       key={entry.celebrity_name} 
                       className="top-item"
                       role="listitem"
-                      aria-label={`Rank ${idx + 1}: ${entry.celebrity_name}, average rating ${entry.average_rating.toFixed(1)} from ${entry.rating_count} ratings`}
+                      aria-label={`Rank ${idx + 1}: average rating ${entry.average_rating.toFixed(1)} from ${entry.rating_count} ratings`}
                     >
                       <img
                         src={entry.image_url}
-                        alt={`Photo of ${entry.celebrity_name}`}
+                        alt={`Rank ${idx + 1}`}
                         className="top-item-image"
                       />
                       <div className="top-item-content">
@@ -100,7 +100,6 @@ export default function Leaderboard() {
                         >
                           #{idx + 1}
                         </div>
-                        <p className="top-item-name">{entry.celebrity_name}</p>
                         <p className="top-item-meta">
                           {entry.rating_count} rating{entry.rating_count !== 1 ? "s" : ""}
                         </p>
@@ -129,12 +128,12 @@ export default function Leaderboard() {
               aria-describedby="table-desc"
             >
               <caption id="table-desc" className="sr-only">
-                Complete leaderboard rankings showing all celebrities with their average ratings and number of ratings
+                Complete leaderboard rankings showing all entries with their average ratings and number of ratings
               </caption>
               <thead>
                 <tr>
                   <th scope="col">Rank</th>
-                  <th scope="col">Celebrity</th>
+                  <th scope="col">Image</th>
                   <th scope="col">Ratings</th>
                   <th scope="col">Avg Score</th>
                 </tr>
@@ -151,15 +150,11 @@ export default function Leaderboard() {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <img
-                          src={entry.image_url}
-                          alt=""
-                          style={{ width: "48px", height: "48px", objectFit: "cover" }}
-                          aria-hidden="true"
-                        />
-                        <span>{entry.celebrity_name}</span>
-                      </div>
+                      <img
+                        src={entry.image_url}
+                        alt={`Rank ${idx + 1}`}
+                        style={{ width: "48px", height: "48px", objectFit: "cover" }}
+                      />
                     </td>
                     <td>{entry.rating_count}</td>
                     <td>
