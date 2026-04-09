@@ -232,7 +232,7 @@ export default function Session() {
               />
               <div style={{ padding: "16px", textAlign: "center" }}>
                 <h2 style={{ fontSize: "18px" }}>
-                  {currentImage.image_index}
+                  {currentImage.celebrity_name}
                 </h2>
               </div>
             </div>
@@ -282,7 +282,8 @@ export default function Session() {
                     : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
                 </button>
                 <span id="submit-desc" className="sr-only">
-                  Submit your rating of {selectedRating} for image {progress.current}
+                  Submit your rating of {selectedRating} for image{" "}
+                  {progress.current}
                 </span>
               </div>
             </div>

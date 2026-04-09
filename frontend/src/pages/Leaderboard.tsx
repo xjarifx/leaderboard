@@ -46,10 +46,15 @@ export default function Leaderboard() {
   }
 
   return (
-    <div id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div
+      id="main-content"
+      style={{ flex: 1, display: "flex", flexDirection: "column" }}
+    >
       <header className="header" role="banner">
         <div className="header-title">
-          <span className="badge" aria-hidden="true">Live Results</span>
+          <span className="badge" aria-hidden="true">
+            Live Results
+          </span>
           <h1>Leaderboard</h1>
         </div>
         <nav className="header-actions" aria-label="Main navigation">
@@ -65,7 +70,9 @@ export default function Leaderboard() {
       {entries.length === 0 ? (
         <div className="section" style={{ textAlign: "center" }}>
           <h2 className="section-title">No Ratings Yet</h2>
-          <p className="section-subtitle">Be the first to rate images this session</p>
+          <p className="section-subtitle">
+            Be the first to rate images this session
+          </p>
           <Link to="/session" className="btn btn-primary">
             Start Rating
           </Link>
@@ -74,15 +81,17 @@ export default function Leaderboard() {
         <main style={{ flex: 1 }} aria-label="Leaderboard rankings">
           {entries.length >= 3 && (
             <div className="section">
-              <h2 className="section-title" id="top3-heading">Top 3</h2>
+              <h2 className="section-title" id="top3-heading">
+                Top 3
+              </h2>
               <p className="section-subtitle">Highest average scores</p>
 
               <div className="top-grid" role="list" aria-label="Top 3">
                 {[0, 1, 2].map((idx) => {
                   const entry = entries[idx];
                   return (
-                    <article 
-                      key={entry.celebrity_name} 
+                    <article
+                      key={entry.celebrity_name}
                       className="top-item"
                       role="listitem"
                       aria-label={`Rank ${idx + 1}: average rating ${entry.average_rating.toFixed(1)} from ${entry.rating_count} ratings`}
@@ -93,21 +102,31 @@ export default function Leaderboard() {
                         className="top-item-image"
                       />
                       <div className="top-item-content">
-                        <div style={{ fontSize: "14px", fontFamily: "monospace", color: "var(--text-secondary)" }}>
-                          {entry.image_index}
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            fontFamily: "monospace",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          {entry.celebrity_name}
                         </div>
-                        <div 
-                          className={`rank-badge ${getRankClass(idx + 1)}`} 
-                          style={{ marginBottom: "8px", display: "inline-flex" }}
+                        <div
+                          className={`rank-badge ${getRankClass(idx + 1)}`}
+                          style={{
+                            marginBottom: "8px",
+                            display: "inline-flex",
+                          }}
                           aria-hidden="true"
                         >
                           #{idx + 1}
                         </div>
                         <p className="top-item-meta">
-                          {entry.rating_count} rating{entry.rating_count !== 1 ? "s" : ""}
+                          {entry.rating_count} rating
+                          {entry.rating_count !== 1 ? "s" : ""}
                         </p>
-                        <div 
-                          className="score-pill" 
+                        <div
+                          className="score-pill"
                           style={{ marginTop: "8px" }}
                           aria-label={`Average rating: ${entry.average_rating.toFixed(1)} out of 10`}
                         >
@@ -122,21 +141,24 @@ export default function Leaderboard() {
           )}
 
           <div className="section">
-            <h2 className="section-title" id="all-rankings-heading">All Rankings</h2>
+            <h2 className="section-title" id="all-rankings-heading">
+              All Rankings
+            </h2>
             <p className="section-subtitle">{entries.length} entries</p>
 
-            <table 
+            <table
               ref={tableRef}
               aria-labelledby="all-rankings-heading"
               aria-describedby="table-desc"
             >
               <caption id="table-desc" className="sr-only">
-                Complete leaderboard rankings showing all entries with their average ratings and number of ratings
+                Complete leaderboard rankings showing all entries with their
+                average ratings and number of ratings
               </caption>
               <thead>
                 <tr>
                   <th scope="col">Rank</th>
-                  <th scope="col">Index</th>
+                  <th scope="col">Name</th>
                   <th scope="col">Image</th>
                   <th scope="col">Ratings</th>
                   <th scope="col">Avg Score</th>
@@ -146,7 +168,7 @@ export default function Leaderboard() {
                 {entries.map((entry, idx) => (
                   <tr key={entry.celebrity_name}>
                     <td>
-                      <span 
+                      <span
                         className={`rank-badge ${getRankClass(idx + 1)}`}
                         aria-label={`Rank ${idx + 1}`}
                       >
@@ -154,20 +176,27 @@ export default function Leaderboard() {
                       </span>
                     </td>
                     <td>
-                      <span className="rank-badge" style={{ fontFamily: "monospace" }}>
-                        {entry.image_index}
+                      <span
+                        className="rank-badge"
+                        style={{ fontFamily: "monospace" }}
+                      >
+                        {entry.celebrity_name}
                       </span>
                     </td>
                     <td>
                       <img
                         src={entry.image_url}
                         alt={`Rank ${idx + 1}`}
-                        style={{ width: "48px", height: "48px", objectFit: "cover" }}
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          objectFit: "cover",
+                        }}
                       />
                     </td>
                     <td>{entry.rating_count}</td>
                     <td>
-                      <span 
+                      <span
                         className="score-pill"
                         aria-label={`Average rating: ${entry.average_rating.toFixed(1)}`}
                       >
@@ -181,7 +210,7 @@ export default function Leaderboard() {
           </div>
         </main>
       )}
-      
+
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
