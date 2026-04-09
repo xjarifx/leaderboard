@@ -1,95 +1,81 @@
 import "dotenv/config";
-
-import fs from "node:fs/promises";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 import ImageKit from "imagekit";
 import prisma from "../lib/prisma.js";
 
-function parseCelebrityName(fileName: string): string {
-  const baseName = fileName.replace(/\.[^.]+$/, "");
-  const match = baseName.match(/^(.*)_\d+_crop$/);
-  const rawName = match ? match[1] : baseName;
-  return rawName.replace(/_/g, " ").trim();
+const imagesDir = "/home/x/Documents/leaderboard/images";
+
+const { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, IMAGEKIT_URL_ENDPOINT } =
+  process.env;
+
+if (!IMAGEKIT_PUBLIC_KEY || !IMAGEKIT_PRIVATE_KEY || !IMAGEKIT_URL_ENDPOINT) {
+  throw new Error("Missing ImageKit credentials");
 }
 
-async function getImageFiles(imagesDir: string): Promise<string[]> {
-  const entries = await fs.readdir(imagesDir, { withFileTypes: true });
+const imageKit = new ImageKit({
+  publicKey: IMAGEKIT_PUBLIC_KEY,
+  privateKey: IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: IMAGEKIT_URL_ENDPOINT,
+});
 
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((name) => /\.(png|jpe?g|webp)$/i.test(name))
-    .sort((a, b) => a.localeCompare(b));
+async function uploadImage(filePath: string, fileName: string) {
+  const fileBuffer = fs.readFileSync(filePath);
+  const base64 = fileBuffer.toString("base64");
+
+  const response = await imageKit.upload({
+    file: base64,
+    fileName: fileName,
+    folder: "/leaderboard",
+  });
+
+  return response.url;
+}
+
+function extractCelebrityName(fileName: string): string {
+  return fileName.replace(/_crop\.png$/, "").replace(/_/g, " ");
 }
 
 async function main() {
-  const { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, IMAGEKIT_URL_ENDPOINT } =
-    process.env;
+  console.log("Resetting database...");
 
-  if (!IMAGEKIT_PUBLIC_KEY || !IMAGEKIT_PRIVATE_KEY || !IMAGEKIT_URL_ENDPOINT) {
-    throw new Error("Missing ImageKit credentials in environment variables");
-  }
-
-  const imageKit = new ImageKit({
-    publicKey: IMAGEKIT_PUBLIC_KEY,
-    privateKey: IMAGEKIT_PRIVATE_KEY,
-    urlEndpoint: IMAGEKIT_URL_ENDPOINT,
-  });
-
-  const imagesDir = path.resolve(process.cwd(), "../images");
-  const imageFiles = await getImageFiles(imagesDir);
-
-  if (imageFiles.length === 0) {
-    throw new Error(`No image files found in ${imagesDir}`);
-  }
-
-  console.log(`Found ${imageFiles.length} image files`);
-  console.log("Resetting app data tables...");
-
-  // Clear child tables first to satisfy FK constraints.
   await prisma.rating.deleteMany();
   await prisma.sessionQueue.deleteMany();
   await prisma.session.deleteMany();
   await prisma.image.deleteMany();
   await prisma.participant.deleteMany();
 
-  console.log("Uploading images and inserting DB rows...");
+  console.log("Reading images from directory...");
 
-  let uploaded = 0;
+  const files = fs.readdirSync(imagesDir).filter((f) => f.endsWith(".png"));
 
-  for (const fileName of imageFiles) {
-    const absolutePath = path.join(imagesDir, fileName);
-    const fileBuffer = await fs.readFile(absolutePath);
-    const celebrityName = parseCelebrityName(fileName);
+  console.log(`Found ${files.length} images`);
 
-    const uploadResponse = await imageKit.upload({
-      file: fileBuffer,
-      fileName,
-      folder: "/leaderboard",
-      useUniqueFileName: false,
-      overwriteFile: true,
-      overwriteAITags: true,
-      overwriteTags: true,
-      overwriteCustomMetadata: true,
-    });
+  for (const file of files) {
+    const filePath = path.join(imagesDir, file);
+    const celebrityName = extractCelebrityName(file);
+
+    console.log(`Uploading ${file}...`);
+
+    const url = await uploadImage(filePath, file);
+
+    console.log(`Storing ${celebrityName} in database...`);
 
     await prisma.image.create({
       data: {
         celebrity_name: celebrityName,
-        image_url: uploadResponse.url,
+        image_url: url,
       },
     });
-
-    uploaded += 1;
-    console.log(`Uploaded ${uploaded}/${imageFiles.length}: ${fileName}`);
   }
 
-  console.log(`Done. Uploaded and inserted ${uploaded} images.`);
+  const count = await prisma.image.count();
+  console.log(`Done! Seeded ${count} images.`);
 }
 
 main()
   .catch((error) => {
-    console.error("resetAndSeedImages failed:", error);
+    console.error("Seed failed:", error);
     process.exitCode = 1;
   })
   .finally(async () => {
