@@ -166,7 +166,7 @@ export default function Session() {
       className="screen session-screen"
       aria-label="Rating session"
     >
-      <header className="hero-head panel-glass">
+      <header className="hero-head panel-glass session-hero">
         <div className="hero-meta">
           <p className="section-kicker">Active Session</p>
           <button
@@ -187,7 +187,7 @@ export default function Session() {
         </div>
       </header>
 
-      <nav className="top-nav panel-glass" aria-label="Primary">
+      <nav className="top-nav panel-glass session-nav" aria-label="Primary">
         <Link to="/session" className="tab-link is-active" aria-current="page">
           Rate
         </Link>
@@ -196,7 +196,7 @@ export default function Session() {
         </Link>
       </nav>
 
-      <section className="panel-glass metrics-panel">
+      <section className="panel-glass metrics-panel session-metrics">
         <div className="metric-row">
           <div>
             <h2 className="section-title">Progress</h2>
@@ -221,7 +221,7 @@ export default function Session() {
         </div>
       </section>
 
-      <section className="two-column">
+      <section className="two-column session-workspace">
         {currentImage ? (
           <article className="image-stage panel-glass">
             <img
