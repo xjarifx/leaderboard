@@ -1,43 +1,64 @@
 # AGENTS.md
 
+Quick runbook for contributors and coding agents working in this repository.
+
 ## Commands
 
-### Backend
+### Backend (`backend/`)
+
 ```bash
 cd backend
 npm install
-npm run db:generate   # Required before first dev run
-npm run dev          # Starts Express on port 3001
-npm run build        # npm ci + prisma generate + tsc
-npm start            # Runs compiled dist/index.js
-npm run db:push      # Push schema to database
-npm run db:reset-seed-images  # Reset DB + reseed from ../images
+npm run db:generate            # required before first local dev run
+npm run dev                    # tsx watch server on port 3001 (default)
+npm run build                  # npm ci + prisma generate + tsc
+npm start                      # runs dist/index.js
+npm run db:push                # push schema changes
+npm run db:migrate             # create/apply migration in dev
+npm run db:reset-seed-images   # reset DB and reseed using ../images
 ```
 
-### Frontend
+### Frontend (`frontend/`)
+
 ```bash
 cd frontend
 npm install
-npm run dev          # Vite dev server (port 5173)
-npm run build        # tsc + vite build
-npm run lint         # ESLint check
+npm run dev                    # Vite dev server on port 5173 (default)
+npm run build                  # tsc + vite build
+npm run preview                # preview built app
+npm run lint                   # ESLint
 ```
 
 ## Order Matters
-- Backend: always run `db:generate` after `npm install` before `dev`
-- Backend build auto-runs `db:generate` (includes `npm ci`)
 
-## Seeding
-- `npm run db:reset-seed-images` reads from `../images/` directory
-- Requires env vars: `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, `DATABASE_URL`
+- Always run backend `npm install` before `npm run db:generate`.
+- Run backend `npm run db:generate` before first `npm run dev`.
+- Backend `npm run build` performs a clean install (`npm ci`).
 
-## Env Variables
+## Seeding Notes
+
+- Seed source directory is `../images/` from backend root.
+- `npm run db:reset-seed-images` requires:
+  - `DATABASE_URL`
+  - `IMAGEKIT_PUBLIC_KEY`
+  - `IMAGEKIT_PRIVATE_KEY`
+  - `IMAGEKIT_URL_ENDPOINT`
+
+## Environment Variables
+
 - Backend `.env`: `DATABASE_URL`, `JWT_SECRET`, `PORT`, `FRONTEND_URL`, ImageKit keys
-- Frontend `.env`: `VITE_API_URL` (optional, defaults to `/api`)
+- Frontend `.env`: `VITE_API_URL` (optional; defaults to relative `/api` behavior)
 
-## Architecture
-- Monorepo with `backend/` and `frontend/` directories
+## Architecture Snapshot
+
+- Monorepo with `backend/` and `frontend/`
 - Backend: Express + Prisma + PostgreSQL + JWT
 - Frontend: React + Vite + Tailwind + React Router
-- Auth: JWT in localStorage, sent via Authorization header
-- Image hosting: ImageKit
+- Auth flow: JWT stored client-side and sent via `Authorization` header
+- Media hosting: ImageKit
+
+## Fast Verification
+
+- Backend health endpoint: `GET /api/health`
+- Frontend dev URL: `http://localhost:5173`
+- Backend dev URL: `http://localhost:3001`
