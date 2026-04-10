@@ -33,7 +33,7 @@ async function deleteImageKitFolder() {
     while (hasMore) {
       try {
         const result = await imageKit.listFiles({
-          folder: folder,
+          path: folder,
           limit: limit,
           skip: skip,
         });
@@ -42,8 +42,10 @@ async function deleteImageKitFolder() {
           hasMore = false;
         } else {
           for (const file of result) {
-            await imageKit.deleteFile(file.fileId);
-            console.log(`Deleted: ${file.name}`);
+            if ("fileId" in file) {
+              await imageKit.deleteFile(file.fileId);
+              console.log(`Deleted: ${file.name}`);
+            }
           }
           skip += limit;
           if (result.length < limit) {
