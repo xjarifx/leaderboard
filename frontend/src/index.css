@@ -90,6 +90,44 @@ h6 {
   top: 16px;
 }
 
+.global-download-wrap {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.global-download-btn {
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+.global-download-error {
+  max-width: 260px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #fde8e7;
+  color: var(--danger);
+  border: 1px solid #f5c2bf;
+}
+
+@media (max-width: 640px) {
+  .global-download-wrap {
+    left: 16px;
+    right: 16px;
+    align-items: stretch;
+  }
+
+  .global-download-btn {
+    width: 100%;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

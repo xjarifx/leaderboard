@@ -5,6 +5,7 @@ import Session from "./pages/Session";
 import SessionComplete from "./pages/SessionComplete";
 import Leaderboard from "./pages/Leaderboard";
 import { getToken } from "./lib/auth";
+import DataDownloadButton from "./components/DataDownloadButton";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!getToken()) {
@@ -18,7 +19,10 @@ function App() {
 
   return (
     <div className="page-container">
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <DataDownloadButton />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
