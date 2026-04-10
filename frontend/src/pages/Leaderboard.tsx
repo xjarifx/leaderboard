@@ -65,7 +65,11 @@ export default function Leaderboard() {
         <Link to="/session" className="tab-link">
           Rate
         </Link>
-        <Link to="/leaderboard" className="tab-link is-active">
+        <Link
+          to="/leaderboard"
+          className="tab-link is-active"
+          aria-current="page"
+        >
           Leaderboard
         </Link>
       </nav>

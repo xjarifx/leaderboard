@@ -188,7 +188,7 @@ export default function Session() {
       </header>
 
       <nav className="top-nav panel-glass" aria-label="Primary">
-        <Link to="/session" className="tab-link is-active">
+        <Link to="/session" className="tab-link is-active" aria-current="page">
           Rate
         </Link>
         <Link to="/leaderboard" className="tab-link">
