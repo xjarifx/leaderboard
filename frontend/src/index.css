@@ -778,6 +778,50 @@ a {
 }
 
 @media (max-width: 820px) {
+  :root {
+    --radius-xl: 14px;
+    --radius-lg: 10px;
+    --radius-md: 8px;
+  }
+
+  .app-shell {
+    width: calc(100% - 14px);
+    margin-top: 10px;
+    gap: 8px;
+  }
+
+  .app-main,
+  .screen {
+    gap: 8px;
+  }
+
+  .panel-glass,
+  .panel-soft,
+  .utility-bar,
+  .top-nav,
+  .hero-head,
+  .metrics-panel,
+  .rating-card,
+  .auth-card,
+  .auth-intro,
+  .image-stage,
+  .modal-card {
+    border-radius: 10px;
+  }
+
+  .btn,
+  .tab-link,
+  .chip,
+  .score-pill,
+  .list-rank {
+    border-radius: 8px;
+  }
+
+  .metric-bar,
+  .range-input {
+    border-radius: 7px;
+  }
+
   .session-screen {
     min-height: calc(100dvh - 130px);
     max-height: calc(100dvh - 130px);
