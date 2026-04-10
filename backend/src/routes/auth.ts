@@ -7,10 +7,14 @@ const router = Router();
 
 router.post("/register", async (req: Request, res: Response) => {
   try {
-    const { student_id, name, password } = req.body;
+    const { student_id, name, password, gender } = req.body;
 
-    if (!student_id || !name || !password) {
+    if (!student_id || !name || !password || !gender) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (!["MALE", "FEMALE", "OTHER"].includes(gender)) {
+      return res.status(400).json({ error: "Invalid gender value" });
     }
 
     const existing = await prisma.participant.findUnique({
@@ -27,6 +31,7 @@ router.post("/register", async (req: Request, res: Response) => {
       data: {
         student_id,
         name,
+        gender,
         password: hashedPassword,
       },
     });
@@ -39,6 +44,7 @@ router.post("/register", async (req: Request, res: Response) => {
         id: participant.id,
         student_id: participant.student_id,
         name: participant.name,
+        gender: participant.gender,
       },
     });
   } catch (error) {
@@ -52,7 +58,9 @@ router.post("/login", async (req: Request, res: Response) => {
     const { student_id, password } = req.body;
 
     if (!student_id || !password) {
-      return res.status(400).json({ error: "Student ID and password required" });
+      return res
+        .status(400)
+        .json({ error: "Student ID and password required" });
     }
 
     const participant = await prisma.participant.findUnique({
@@ -77,6 +85,7 @@ router.post("/login", async (req: Request, res: Response) => {
         id: participant.id,
         student_id: participant.student_id,
         name: participant.name,
+        gender: participant.gender,
       },
     });
   } catch (error) {

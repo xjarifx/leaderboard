@@ -6,6 +6,7 @@ import { setToken, setParticipant } from "../lib/auth";
 export default function Register() {
   const [studentId, setStudentId] = useState("");
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<"MALE" | "FEMALE" | "OTHER" | "">("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,17 +28,31 @@ export default function Register() {
       return;
     }
 
+    if (!gender) {
+      const message = "Please select your gender";
+      setError(message);
+      setAnnounce(`Error: ${message}`);
+      firstErrorRef.current?.focus();
+      return;
+    }
+
     setLoading(true);
     setAnnounce("Creating account...");
 
     try {
-      const { token, participant } = await api.register(studentId, name, password);
+      const { token, participant } = await api.register(
+        studentId,
+        name,
+        password,
+        gender,
+      );
       setToken(token);
       setParticipant(participant);
       setAnnounce("Account created. Redirecting...");
       navigate("/session");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Registration failed";
+      const message =
+        err instanceof Error ? err.message : "Registration failed";
       setError(message);
       setAnnounce(`Error: ${message}`);
       firstErrorRef.current?.focus();
@@ -49,15 +64,19 @@ export default function Register() {
   return (
     <div className="auth-container" role="main" aria-labelledby="auth-title">
       <div className="auth-card">
-        <span className="badge" aria-hidden="true">Join Now</span>
-        <h1 id="auth-title" className="auth-title">Create Account</h1>
+        <span className="badge" aria-hidden="true">
+          Join Now
+        </span>
+        <h1 id="auth-title" className="auth-title">
+          Create Account
+        </h1>
         <p className="auth-subtitle">Fill in your details to get started</p>
 
         {error && (
-          <div 
+          <div
             ref={firstErrorRef}
-            className="error-box" 
-            role="alert" 
+            className="error-box"
+            role="alert"
             aria-live="assertive"
             tabIndex={-1}
           >
@@ -99,6 +118,29 @@ export default function Register() {
               aria-required="true"
               autoComplete="name"
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gender" className="label label-required">
+              Gender
+            </label>
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) =>
+                setGender(e.target.value as "MALE" | "FEMALE" | "OTHER" | "")
+              }
+              className="input"
+              required
+              aria-required="true"
+            >
+              <option value="" disabled>
+                Select your gender
+              </option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
           </div>
 
           <div className="form-group">
@@ -157,7 +199,7 @@ export default function Register() {
           </Link>
         </p>
       </div>
-      
+
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>

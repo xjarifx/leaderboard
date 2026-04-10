@@ -26,22 +26,23 @@ const students = [
   { id: "232-15-191", name: "Md. Yasin Rifat" },
   { id: "232-15-010", name: "MD Ragib Shariar" },
   { id: "232-15-777", name: "Md Nazmus Sakib" },
-  { id: "232-15-165", name: "MD.Jubaer Al-fi Sanny" }
+  { id: "232-15-165", name: "MD.Jubaer Al-fi Sanny" },
 ];
 
 async function main() {
   const hashedPassword = await bcrypt.hash("diu", 10);
-  
+
   for (const s of students) {
     try {
       await prisma.participant.upsert({
         where: { student_id: s.id },
-        update: { name: s.name },
+        update: { name: s.name, gender: "OTHER" },
         create: {
           student_id: s.id,
           name: s.name,
-          password: hashedPassword
-        }
+          gender: "OTHER",
+          password: hashedPassword,
+        },
       });
       console.log("Registered:", s.name);
     } catch (e) {

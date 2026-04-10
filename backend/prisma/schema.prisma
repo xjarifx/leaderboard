@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model Image {
   id             Int            @id @default(autoincrement())
   image_index    String         @unique
@@ -19,6 +25,7 @@ model Participant {
   id         Int       @id @default(autoincrement())
   student_id String    @unique
   name       String
+  gender     Gender    @default(OTHER)
   password   String
   sessions   Session[]
 }

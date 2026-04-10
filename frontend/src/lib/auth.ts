@@ -2,6 +2,7 @@ export interface Participant {
   id: number;
   student_id: string;
   name: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
 }
 
 export function getParticipant(): Participant | null {

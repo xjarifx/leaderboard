@@ -39,6 +39,7 @@ export interface Participant {
   id: number;
   student_id: string;
   name: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
 }
 
 export interface Image {
@@ -78,10 +79,15 @@ export const api = {
       body: JSON.stringify({ student_id, password }),
     }),
 
-  register: (student_id: string, name: string, password: string) =>
+  register: (
+    student_id: string,
+    name: string,
+    password: string,
+    gender: "MALE" | "FEMALE" | "OTHER",
+  ) =>
     request<{ token: string; participant: Participant }>("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ student_id, name, password }),
+      body: JSON.stringify({ student_id, name, password, gender }),
     }),
 
   getSessions: () => request<Session[]>("/sessions"),
