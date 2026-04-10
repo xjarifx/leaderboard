@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api, Rating } from "../lib/api";
 import { getCurrentSession, logout } from "../lib/auth";
 
@@ -8,7 +8,6 @@ export default function SessionComplete() {
   const [loading, setLoading] = useState(true);
   const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
-  const statusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sessionId = getCurrentSession();
@@ -37,114 +36,99 @@ export default function SessionComplete() {
 
   if (loading) {
     return (
-      <div className="loading" role="status" aria-live="polite">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span className="sr-only">Loading session results...</span>
+      <div className="loading-screen" role="status" aria-live="polite">
+        <div className="panel-glass loading-card">
+          <div className="spinner" aria-hidden="true" />
+          <strong>Loading summary</strong>
+          <p className="section-copy">Preparing your completed session.</p>
+        </div>
       </div>
     );
   }
 
   const averageRating =
     ratings.length > 0
-      ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
+      ? (
+          ratings.reduce((sum, rating) => sum + rating.rating, 0) /
+          ratings.length
+        ).toFixed(1)
       : "0";
 
   return (
-    <div id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      <header className="header" role="banner">
-        <div className="header-title">
-          <h1>Session Complete</h1>
-        </div>
-<button onClick={handleLogout} className="btn btn-danger">
+    <main id="main-content" className="screen" aria-label="Session complete">
+      <header className="hero-head panel-glass">
+        <div className="hero-meta">
+          <p className="section-kicker">Completed</p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-ghost"
+          >
             Sign Out
           </button>
+        </div>
+        <div>
+          <h1 className="display-title">Session complete</h1>
+          <p className="section-copy">
+            Your ratings are saved and ready to compare on the leaderboard.
+          </p>
+        </div>
       </header>
 
-      <main style={{ flex: 1 }} aria-label="Session results">
-        <div ref={statusRef} className="section" style={{ textAlign: "center" }}>
-          <span className="badge badge-success">Nice Work!</span>
-          <h2 style={{ fontSize: "24px", marginTop: "16px", marginBottom: "8px" }}>
-            Session Complete
-          </h2>
-          <p className="section-subtitle">Your ratings have been recorded</p>
+      <section className="stats-grid" aria-label="Session stats">
+        <article className="stat-card panel-glass">
+          <span className="stat-label">Images Rated</span>
+          <p className="stat-value">{ratings.length}</p>
+        </article>
+        <article className="stat-card panel-glass">
+          <span className="stat-label">Average Score</span>
+          <p className="stat-value">{averageRating}</p>
+        </article>
+      </section>
 
-          <div 
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "24px" }}
-            role="region" 
-            aria-label="Session statistics"
-          >
-            <div 
-              style={{ padding: "20px", border: "1px solid var(--border)", background: "var(--bg-hover)" }}
-              aria-label={`${ratings.length} images rated`}
-            >
-              <p style={{ fontSize: "32px", fontWeight: "700", color: "var(--brand)" }}>
-                {ratings.length}
-              </p>
-              <p style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--text-secondary)", marginTop: "4px" }}>
-                Images Rated
-              </p>
-            </div>
-            <div 
-              style={{ padding: "20px", border: "1px solid var(--border)", background: "var(--bg-hover)" }}
-              aria-label={`Average rating ${averageRating}`}
-            >
-              <p style={{ fontSize: "32px", fontWeight: "700", color: "var(--success)" }}>
-                {averageRating}
-              </p>
-              <p style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--text-secondary)", marginTop: "4px" }}>
-                Avg Score
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="section">
-          <h3 className="section-title" id="ratings-heading">Your Ratings</h3>
-          <p className="section-subtitle">Recap of your scored images</p>
-
-          <div 
-            style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}
-            role="list" 
-            aria-label="Rated images"
-          >
-            {ratings.map((rating, idx) => (
-              <figure 
-                key={rating.id} 
-                role="listitem"
-                aria-label={`Image ${idx + 1}: rated ${rating.rating} out of 10`}
-                style={{ margin: 0 }}
-              >
-                <img
-                  src={rating.image.image_url}
-                  alt={`Image ${idx + 1}`}
-                  style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
-                />
-                <figcaption 
-                  style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.7)", padding: "4px", textAlign: "center" }}
-                  aria-hidden="true"
-                >
-                  <span style={{ color: "white", fontSize: "12px", fontWeight: "600" }}>
-                    {rating.rating}
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-
-        <nav style={{ display: "flex", gap: "12px", justifyContent: "center" }} aria-label="Actions">
+      <section className="panel-glass">
+        <div className="btn-row">
           <Link to="/leaderboard" className="btn btn-primary">
-            View Leaderboard
+            View leaderboard
           </Link>
-          <button onClick={handleLogout} className="btn">
-            Sign Out
-          </button>
-        </nav>
-      </main>
-      
+          <Link to="/session" className="btn btn-secondary">
+            Back to session
+          </Link>
+        </div>
+      </section>
+
+      <section className="panel-glass">
+        <div>
+          <h2 className="section-title">Your ratings</h2>
+          <p className="section-copy">A compact recap of this session.</p>
+        </div>
+        <div className="grid-results" role="list" style={{ marginTop: "14px" }}>
+          {ratings.map((rating, index) => (
+            <article
+              key={rating.id}
+              className="result-card panel-soft"
+              role="listitem"
+            >
+              <img
+                src={rating.image.image_url}
+                alt={`${rating.image.celebrity_name} rated ${rating.rating}`}
+              />
+              <div className="result-body">
+                <h3 className="list-name">{rating.image.celebrity_name}</h3>
+                <p className="list-meta">Image {index + 1}</p>
+                <div className="score-pill" style={{ marginTop: "10px" }}>
+                  <span className="score-value">{rating.rating}</span>
+                  <span className="score-caption">Your score</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
-    </div>
+    </main>
   );
 }

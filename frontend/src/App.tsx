@@ -18,45 +18,55 @@ function App() {
   const isAuthenticated = Boolean(getToken());
 
   return (
-    <div className="page-container">
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
-      <DataDownloadButton />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/session"
-          element={
-            <ProtectedRoute>
-              <Session />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/session/complete"
-          element={
-            <ProtectedRoute>
-              <SessionComplete />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/leaderboard"
-          element={
-            <ProtectedRoute>
-              <Leaderboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <Navigate to={isAuthenticated ? "/session" : "/login"} replace />
-          }
-        />
-      </Routes>
+    <div className="app-root">
+      <div className="app-atmosphere" aria-hidden="true" />
+      <div className="app-shell">
+        <header className="utility-bar" aria-label="Global actions">
+          <div>
+            <p className="utility-kicker">Face Score Lab</p>
+          </div>
+          <DataDownloadButton />
+        </header>
+        <div className="app-main">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/session"
+              element={
+                <ProtectedRoute>
+                  <Session />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/session/complete"
+              element={
+                <ProtectedRoute>
+                  <SessionComplete />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={
+                <ProtectedRoute>
+                  <Leaderboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <Navigate
+                  to={isAuthenticated ? "/session" : "/login"}
+                  replace
+                />
+              }
+            />
+          </Routes>
+        </div>
+      </div>
     </div>
   );
 }

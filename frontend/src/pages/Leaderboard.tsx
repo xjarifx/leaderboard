@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api, LeaderboardEntry } from "../lib/api";
 import { logout } from "../lib/auth";
 
@@ -8,7 +8,6 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
-  const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
     api
@@ -29,191 +28,120 @@ export default function Leaderboard() {
     navigate("/login");
   };
 
-  const getRankClass = (rank: number) => {
-    if (rank === 1) return "rank-1";
-    if (rank === 2) return "rank-2";
-    if (rank === 3) return "rank-3";
-    return "";
-  };
-
   if (loading) {
     return (
-      <div className="loading" role="status" aria-live="polite">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span className="sr-only">Loading leaderboard...</span>
+      <div className="loading-screen" role="status" aria-live="polite">
+        <div className="panel-glass loading-card">
+          <div className="spinner" aria-hidden="true" />
+          <strong>Loading leaderboard</strong>
+          <p className="section-copy">Syncing the latest results.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      id="main-content"
-      style={{ flex: 1, display: "flex", flexDirection: "column" }}
-    >
-      <header className="header" role="banner">
-        <div className="header-title">
-          <span className="badge" aria-hidden="true">
-            Live Results
-          </span>
-          <h1>Leaderboard</h1>
-        </div>
-        <nav className="header-actions" aria-label="Main navigation">
-          <Link to="/session" className="btn">
-            Rate
-          </Link>
-          <button onClick={handleLogout} className="btn btn-danger">
+    <main id="main-content" className="screen" aria-label="Leaderboard">
+      <header className="hero-head panel-glass">
+        <div className="hero-meta">
+          <p className="section-kicker">Leaderboard</p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-ghost"
+          >
             Sign Out
           </button>
-        </nav>
+        </div>
+        <div>
+          <h1 className="display-title">Live ranking</h1>
+          <p className="section-copy">
+            Compare average image scores and track the strongest performers.
+          </p>
+        </div>
       </header>
 
+      <nav className="top-nav panel-glass" aria-label="Primary">
+        <Link to="/session" className="tab-link">
+          Rate
+        </Link>
+        <Link to="/leaderboard" className="tab-link is-active">
+          Leaderboard
+        </Link>
+      </nav>
+
       {entries.length === 0 ? (
-        <div className="section" style={{ textAlign: "center" }}>
-          <h2 className="section-title">No Ratings Yet</h2>
-          <p className="section-subtitle">
-            Be the first to rate images this session
+        <section className="panel-glass">
+          <h2 className="section-title">No ratings yet</h2>
+          <p className="section-copy">
+            Start a session to populate the leaderboard.
           </p>
-          <Link to="/session" className="btn btn-primary">
-            Start Rating
-          </Link>
-        </div>
-      ) : (
-        <main style={{ flex: 1 }} aria-label="Leaderboard rankings">
-          {entries.length >= 3 && (
-            <div className="section">
-              <h2 className="section-title" id="top3-heading">
-                Top 3
-              </h2>
-              <p className="section-subtitle">Highest average scores</p>
-
-              <div className="top-grid" role="list" aria-label="Top 3">
-                {[0, 1, 2].map((idx) => {
-                  const entry = entries[idx];
-                  return (
-                    <article
-                      key={entry.celebrity_name}
-                      className="top-item"
-                      role="listitem"
-                      aria-label={`Rank ${idx + 1}: average rating ${entry.average_rating.toFixed(1)} from ${entry.rating_count} ratings`}
-                    >
-                      <img
-                        src={entry.image_url}
-                        alt={`Rank ${idx + 1}`}
-                        className="top-item-image"
-                      />
-                      <div className="top-item-content">
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            fontFamily: "monospace",
-                            color: "var(--text-secondary)",
-                          }}
-                        >
-                          {entry.celebrity_name}
-                        </div>
-                        <div
-                          className={`rank-badge ${getRankClass(idx + 1)}`}
-                          style={{
-                            marginBottom: "8px",
-                            display: "inline-flex",
-                          }}
-                          aria-hidden="true"
-                        >
-                          #{idx + 1}
-                        </div>
-                        <p className="top-item-meta">
-                          {entry.rating_count} rating
-                          {entry.rating_count !== 1 ? "s" : ""}
-                        </p>
-                        <div
-                          className="score-pill"
-                          style={{ marginTop: "8px" }}
-                          aria-label={`Average rating: ${entry.average_rating.toFixed(1)} out of 10`}
-                        >
-                          {entry.average_rating.toFixed(1)}
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="section">
-            <h2 className="section-title" id="all-rankings-heading">
-              All Rankings
-            </h2>
-            <p className="section-subtitle">{entries.length} entries</p>
-
-            <table
-              ref={tableRef}
-              aria-labelledby="all-rankings-heading"
-              aria-describedby="table-desc"
-            >
-              <caption id="table-desc" className="sr-only">
-                Complete leaderboard rankings showing all entries with their
-                average ratings and number of ratings
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Image</th>
-                  <th scope="col">Ratings</th>
-                  <th scope="col">Avg Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry, idx) => (
-                  <tr key={entry.celebrity_name}>
-                    <td>
-                      <span
-                        className={`rank-badge ${getRankClass(idx + 1)}`}
-                        aria-label={`Rank ${idx + 1}`}
-                      >
-                        {idx + 1}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className="rank-badge"
-                        style={{ fontFamily: "monospace" }}
-                      >
-                        {entry.celebrity_name}
-                      </span>
-                    </td>
-                    <td>
-                      <img
-                        src={entry.image_url}
-                        alt={`Rank ${idx + 1}`}
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </td>
-                    <td>{entry.rating_count}</td>
-                    <td>
-                      <span
-                        className="score-pill"
-                        aria-label={`Average rating: ${entry.average_rating.toFixed(1)}`}
-                      >
-                        {entry.average_rating.toFixed(1)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="btn-row" style={{ marginTop: "12px" }}>
+            <Link to="/session" className="btn btn-primary">
+              Start rating
+            </Link>
           </div>
-        </main>
+        </section>
+      ) : (
+        <>
+          <section className="stats-grid" aria-label="Leaderboard stats">
+            <article className="stat-card panel-glass">
+              <span className="stat-label">Entries</span>
+              <p className="stat-value">{entries.length}</p>
+            </article>
+            <article className="stat-card panel-glass">
+              <span className="stat-label">Top score</span>
+              <p className="stat-value">
+                {entries[0]?.average_rating.toFixed(1)}
+              </p>
+            </article>
+          </section>
+
+          <section className="panel-glass">
+            <div>
+              <h2 className="section-title">All participants</h2>
+              <p className="section-copy">
+                Ranked by average rating, highest first.
+              </p>
+            </div>
+            <div
+              className="list-stack"
+              role="list"
+              style={{ marginTop: "14px" }}
+            >
+              {entries.map((entry, index) => (
+                <article
+                  key={entry.image_index}
+                  className="list-card panel-soft"
+                  role="listitem"
+                >
+                  <div className="list-rank" aria-hidden="true">
+                    {index + 1}
+                  </div>
+                  <img src={entry.image_url} alt={entry.celebrity_name} />
+                  <div>
+                    <h3 className="list-name">{entry.celebrity_name}</h3>
+                    <p className="list-meta">
+                      {entry.rating_count} rating
+                      {entry.rating_count !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div className="score-pill">
+                    <span className="score-value">
+                      {entry.average_rating.toFixed(1)}
+                    </span>
+                    <span className="score-caption">Score</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
       )}
 
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
-    </div>
+    </main>
   );
 }

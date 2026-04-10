@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api, Image } from "../lib/api";
 import {
-  logout,
-  getParticipant,
-  setCurrentSession,
   getCurrentSession,
+  getParticipant,
+  logout,
+  setCurrentSession,
 } from "../lib/auth";
+
+const QUICK_RATINGS = [1, 3, 5, 7, 10];
 
 export default function Session() {
   const [currentImage, setCurrentImage] = useState<Image | null>(null);
-  const [selectedRating, setSelectedRating] = useState<number>(5);
+  const [selectedRating, setSelectedRating] = useState(5);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -20,8 +22,6 @@ export default function Session() {
   const [announce, setAnnounce] = useState("");
   const participant = getParticipant();
   const navigate = useNavigate();
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
-  const sliderRef = useRef<HTMLInputElement>(null);
 
   const fetchCurrentImage = useCallback(async () => {
     let sessionId = getCurrentSession();
@@ -29,15 +29,13 @@ export default function Session() {
     if (!sessionId) {
       try {
         const sessions = await api.getSessions();
-        const incomplete = sessions.find(
-          (s: { is_completed: boolean }) => !s.is_completed,
-        );
+        const incomplete = sessions.find((s) => !s.is_completed);
         if (incomplete) {
           sessionId = incomplete.id;
           setCurrentSession(sessionId);
         }
       } catch {
-        // No sessions yet
+        // Fall back to creating a session below.
       }
     }
 
@@ -52,6 +50,7 @@ export default function Session() {
             ? err.message
             : "Failed to create session. Add images first.",
         );
+        setLoading(false);
         return;
       }
     }
@@ -86,7 +85,9 @@ export default function Session() {
   }, [ratedCount]);
 
   useEffect(() => {
-    if (!showBreakModal) return;
+    if (!showBreakModal) {
+      return;
+    }
 
     const timer = setInterval(() => {
       setBreakTimeLeft((prev) => {
@@ -101,19 +102,18 @@ export default function Session() {
     return () => clearInterval(timer);
   }, [showBreakModal]);
 
-  useEffect(() => {
-    if (submitButtonRef.current) {
-      submitButtonRef.current.focus();
-    }
-  }, [selectedRating]);
-
   const handleRate = async (rating: number) => {
-    if (!currentImage || submitting) return;
+    if (!currentImage || submitting) {
+      return;
+    }
 
     setSubmitting(true);
     setAnnounce(`Rating ${rating} submitted`);
     const sessionId = getCurrentSession();
-    if (!sessionId) return;
+    if (!sessionId) {
+      setSubmitting(false);
+      return;
+    }
 
     try {
       await api.rateImage(sessionId, currentImage.id, rating);
@@ -132,11 +132,11 @@ export default function Session() {
   };
 
   const getRatingLabel = (rating: number) => {
-    if (rating <= 3) return "Poor";
-    if (rating <= 5) return "Average";
-    if (rating <= 7) return "Good";
-    if (rating <= 9) return "Great";
-    return "Perfect";
+    if (rating <= 2) return "Very low";
+    if (rating <= 4) return "Low";
+    if (rating <= 6) return "Average";
+    if (rating <= 8) return "High";
+    return "Very high";
   };
 
   const formatTime = (seconds: number) => {
@@ -145,187 +145,184 @@ export default function Session() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    setSelectedRating(value);
-    setAnnounce(`Rating ${value} selected`);
-  };
-
   if (loading) {
     return (
-      <div className="loading" role="status" aria-live="polite">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span className="sr-only">Loading current image...</span>
+      <div className="loading-screen" role="status" aria-live="polite">
+        <div className="panel-glass loading-card">
+          <div className="spinner" aria-hidden="true" />
+          <strong>Loading session</strong>
+          <p className="section-copy">Getting the next image.</p>
+        </div>
       </div>
     );
   }
 
+  const progressPercent =
+    progress.total > 0 ? (progress.current / progress.total) * 100 : 0;
+
   return (
-    <div
+    <main
       id="main-content"
-      style={{ flex: 1, display: "flex", flexDirection: "column" }}
+      className="screen session-screen"
+      aria-label="Rating session"
     >
-      <header className="header" role="banner">
-        <div className="header-title">
-          <span className="badge" aria-hidden="true">
-            Active Session
-          </span>
-          <h1>{participant?.name}</h1>
-          <p>ID: {participant?.student_id}</p>
-        </div>
-        <nav className="header-actions" aria-label="Main navigation">
-          <Link to="/leaderboard" className="btn">
-            Rankings
-          </Link>
-          <button onClick={handleLogout} className="btn btn-danger">
+      <header className="hero-head panel-glass">
+        <div className="hero-meta">
+          <p className="section-kicker">Active Session</p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-ghost"
+          >
             Sign Out
           </button>
-        </nav>
+        </div>
+        <div>
+          <h1 className="display-title">
+            {participant?.name ?? "Participant"}
+          </h1>
+          <p className="section-copy">
+            ID {participant?.student_id ?? "N/A"} • Rate one image at a time.
+          </p>
+        </div>
       </header>
 
-      <main
-        style={{ flex: 1, paddingBottom: "80px" }}
-        aria-label="Rating session"
-      >
-        <div className="section" role="status" aria-live="polite">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "8px",
-            }}
-          >
-            <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-              Progress
-            </span>
-            <span style={{ fontSize: "13px", fontWeight: "600" }}>
-              {progress.current} of {progress.total}
-            </span>
+      <nav className="top-nav panel-glass" aria-label="Primary">
+        <Link to="/session" className="tab-link is-active">
+          Rate
+        </Link>
+        <Link to="/leaderboard" className="tab-link">
+          Leaderboard
+        </Link>
+      </nav>
+
+      <section className="panel-glass metrics-panel">
+        <div className="metric-row">
+          <div>
+            <h2 className="section-title">Progress</h2>
+            <p className="section-copy">
+              {progress.current} of {progress.total} images
+            </p>
           </div>
+          <span className="metric-value">{ratedCount} rated</span>
+        </div>
+        <div
+          className="metric-bar"
+          role="progressbar"
+          aria-valuenow={progress.current}
+          aria-valuemin={0}
+          aria-valuemax={progress.total}
+          aria-label="Session progress"
+        >
           <div
-            className="progress-bar"
-            role="progressbar"
-            aria-valuenow={progress.current}
-            aria-valuemin={0}
-            aria-valuemax={progress.total}
-            aria-label="Session progress"
-          >
-            <div
-              className="progress-fill"
-              style={{
-                width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
-              }}
+            className="metric-fill"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </section>
+
+      <section className="two-column">
+        {currentImage ? (
+          <article className="image-stage panel-glass">
+            <img
+              src={currentImage.image_url}
+              alt={`${currentImage.celebrity_name} for rating`}
             />
+            <div className="image-body">
+              <h2 className="image-name">{currentImage.celebrity_name}</h2>
+              <p className="image-meta">Current image in your queue</p>
+            </div>
+          </article>
+        ) : null}
+
+        <article className="panel-glass rating-card">
+          <div>
+            <h2 className="section-title">Your score</h2>
+            <p className="section-copy">Choose from 1 to 10.</p>
           </div>
-        </div>
 
-        <div className="rating-layout">
-          {currentImage && (
-            <div
-              className="section image-section"
-              style={{ padding: 0, overflow: "hidden" }}
-            >
-              <img
-                src={currentImage.image_url}
-                alt={`Image ${progress.current}`}
-                style={{ width: "100%", display: "block" }}
-              />
-              <div style={{ padding: "16px", textAlign: "center" }}>
-                <h2 style={{ fontSize: "18px" }}>
-                  {currentImage.celebrity_name}
-                </h2>
-              </div>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            value={selectedRating}
+            onChange={(e) => setSelectedRating(Number(e.target.value))}
+            className="range-input"
+            aria-label={`Rating ${selectedRating} out of 10`}
+          />
+
+          <div className="rating-summary" aria-live="polite">
+            <div>
+              <p className="rating-score">{selectedRating}</p>
+              <p className="rating-label">{getRatingLabel(selectedRating)}</p>
             </div>
-          )}
-
-          <div className="section rating-section">
-            <h3 className="section-title" id="rating-heading">
-              Rate This Person
-            </h3>
-            <p className="section-subtitle">Drag to select a score</p>
-
-            <div className="slider-container">
-              <input
-                ref={sliderRef}
-                type="range"
-                min="1"
-                max="10"
-                value={selectedRating}
-                onChange={handleSliderChange}
-                className="simple-slider"
-                aria-label={`Rating: ${selectedRating} out of 10`}
-                aria-valuemin={1}
-                aria-valuemax={10}
-                aria-valuenow={selectedRating}
-              />
-
-              <div className="slider-value-display" aria-live="polite">
-                <span className="slider-number">{selectedRating}</span>
-                <span className="slider-label">
-                  {getRatingLabel(selectedRating)}
-                </span>
-              </div>
-            </div>
-
-            <div className="fixed-bottom">
-              <div className="submit-container">
-                <button
-                  ref={submitButtonRef}
-                  onClick={() => handleRate(selectedRating)}
-                  disabled={submitting}
-                  className="btn btn-primary"
-                  style={{ width: "100%" }}
-                  aria-describedby="submit-desc"
-                >
-                  {submitting
-                    ? "Submitting..."
-                    : `Submit ${selectedRating} - ${getRatingLabel(selectedRating)}`}
-                </button>
-                <span id="submit-desc" className="sr-only">
-                  Submit your rating of {selectedRating} for image{" "}
-                  {progress.current}
-                </span>
-              </div>
+            <div className="score-pill">
+              <span className="score-value">
+                {Math.round(progressPercent)}%
+              </span>
+              <span className="score-caption">Complete</span>
             </div>
           </div>
-        </div>
-      </main>
 
-      {showBreakModal && (
+          <div className="rating-quick" aria-label="Quick ratings">
+            {QUICK_RATINGS.map((rating) => (
+              <button
+                key={rating}
+                type="button"
+                className={`chip ${selectedRating === rating ? "is-selected" : ""}`}
+                onClick={() => setSelectedRating(rating)}
+              >
+                {rating}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleRate(selectedRating)}
+            disabled={submitting || !currentImage}
+            className="btn btn-primary btn-block"
+          >
+            {submitting ? "Submitting..." : `Submit rating ${selectedRating}`}
+          </button>
+        </article>
+      </section>
+
+      {showBreakModal ? (
         <div
           className="modal-overlay"
           role="dialog"
           aria-modal="true"
           aria-labelledby="break-title"
         >
-          <div className="modal">
-            <span className="badge" aria-hidden="true">
-              Take a Break
-            </span>
-            <h2 id="break-title" className="modal-title">
-              You've rated {ratedCount} images
-            </h2>
-            <p className="modal-text">Take a moment to rest your eyes</p>
-            <div className="modal-timer" aria-live="polite" aria-atomic="true">
-              {formatTime(breakTimeLeft)}
+          <div className="modal-card panel-glass">
+            <p className="section-kicker">Break</p>
+            <h2 id="break-title">Pause for a moment</h2>
+            <p>
+              You have rated {ratedCount} images. Take a short rest, then
+              continue.
+            </p>
+            <div className="timer-box" aria-live="polite" aria-atomic="true">
+              <span className="timer-value">{formatTime(breakTimeLeft)}</span>
+              <span className="section-copy">Recommended break time</span>
             </div>
             <button
+              type="button"
               onClick={() => {
                 setShowBreakModal(false);
                 setAnnounce("Break ended. Continue rating.");
               }}
-              className="btn btn-primary"
-              style={{ width: "100%" }}
+              className="btn btn-primary btn-block"
             >
               Continue
             </button>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
-    </div>
+    </main>
   );
 }

@@ -21,7 +21,7 @@ export default function DataDownloadButton() {
       const blob = await response.blob();
       const contentDisposition =
         response.headers.get("Content-Disposition") || "";
-      const matchedName = contentDisposition.match(/filename=\"?([^\";]+)\"?/i);
+      const matchedName = contentDisposition.match(/filename="?([^";]+)"?/i);
       const fileName = matchedName?.[1] || "leaderboard-data.json";
 
       const objectUrl = URL.createObjectURL(blob);
@@ -40,17 +40,17 @@ export default function DataDownloadButton() {
   };
 
   return (
-    <div className="global-download-wrap" aria-live="polite">
+    <div className="download-utility" aria-live="polite">
       <button
         type="button"
-        className="btn btn-primary global-download-btn"
+        className="btn btn-ghost"
         onClick={handleDownload}
         disabled={isPreparing}
       >
         {isPreparing ? "Preparing data..." : "Download Public Data"}
       </button>
       {error && (
-        <p className="global-download-error" role="alert">
+        <p className="download-error" role="alert">
           {error}
         </p>
       )}

@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
-import { setToken, setParticipant } from "../lib/auth";
+import { setParticipant, setToken } from "../lib/auth";
 
 export default function Register() {
   const [studentId, setStudentId] = useState("");
@@ -14,7 +14,6 @@ export default function Register() {
   const [announce, setAnnounce] = useState("");
   const navigate = useNavigate();
   const firstErrorRef = useRef<HTMLDivElement>(null);
-  const firstInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +47,7 @@ export default function Register() {
       );
       setToken(token);
       setParticipant(participant);
-      setAnnounce("Account created. Redirecting...");
+      setAnnounce("Account created. Redirecting to session.");
       navigate("/session");
     } catch (err) {
       const message =
@@ -62,147 +61,142 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-container" role="main" aria-labelledby="auth-title">
-      <div className="auth-card">
-        <span className="badge" aria-hidden="true">
-          Join Now
-        </span>
-        <h1 id="auth-title" className="auth-title">
-          Create Account
-        </h1>
-        <p className="auth-subtitle">Fill in your details to get started</p>
+    <main
+      id="main-content"
+      className="screen screen-auth"
+      aria-labelledby="register-title"
+    >
+      <section className="auth-layout">
+        <section
+          className="auth-card panel-glass"
+          aria-label="Create account form"
+        >
+          <header className="section-head">
+            <p className="section-kicker">New Participant</p>
+            <h1 id="register-title" className="section-title">
+              Create account
+            </h1>
+          </header>
 
-        {error && (
-          <div
-            ref={firstErrorRef}
-            className="error-box"
-            role="alert"
-            aria-live="assertive"
-            tabIndex={-1}
-          >
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label htmlFor="studentId" className="label label-required">
-              Student ID
-            </label>
-            <input
-              ref={firstInputRef}
-              id="studentId"
-              type="text"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className="input"
-              placeholder="Enter your student ID"
-              required
-              aria-required="true"
-              autoComplete="username"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="name" className="label label-required">
-              Full Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input"
-              placeholder="Enter your full name"
-              required
-              aria-required="true"
-              autoComplete="name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="gender" className="label label-required">
-              Gender
-            </label>
-            <select
-              id="gender"
-              value={gender}
-              onChange={(e) =>
-                setGender(e.target.value as "MALE" | "FEMALE" | "OTHER" | "")
-              }
-              className="input"
-              required
-              aria-required="true"
+          {error ? (
+            <div
+              ref={firstErrorRef}
+              className="error-box"
+              role="alert"
+              aria-live="assertive"
+              tabIndex={-1}
             >
-              <option value="" disabled>
-                Select your gender
-              </option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
+              {error}
+            </div>
+          ) : null}
 
-          <div className="form-group">
-            <label htmlFor="password" className="label label-required">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input"
-              placeholder="Create a password"
-              required
-              aria-required="true"
-              autoComplete="new-password"
-              minLength={6}
-              aria-describedby="password-hint"
-            />
-            <span id="password-hint" className="sr-only">
-              Must be at least 6 characters
-            </span>
-          </div>
+          <form onSubmit={handleSubmit} className="form-stack" noValidate>
+            <div>
+              <label htmlFor="studentId" className="field-label">
+                Student ID
+              </label>
+              <input
+                id="studentId"
+                type="text"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                className="field-input"
+                placeholder="22-0000-0"
+                autoComplete="username"
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword" className="label label-required">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input"
-              placeholder="Confirm your password"
-              required
-              aria-required="true"
-              autoComplete="new-password"
-            />
-          </div>
+            <div>
+              <label htmlFor="name" className="field-label">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="field-input"
+                placeholder="Your full name"
+                autoComplete="name"
+                required
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ width: "100%", marginTop: "8px" }}
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
+            <div>
+              <label htmlFor="gender" className="field-label">
+                Gender
+              </label>
+              <select
+                id="gender"
+                value={gender}
+                onChange={(e) =>
+                  setGender(e.target.value as "MALE" | "FEMALE" | "OTHER" | "")
+                }
+                className="field-select"
+                required
+              >
+                <option value="">Choose one</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
 
-        <p className="auth-footer">
-          Already have an account?{" "}
-          <Link to="/login" className="auth-link">
-            Sign in
-          </Link>
-        </p>
-      </div>
+            <div>
+              <label htmlFor="password" className="field-label">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="field-input"
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="field-label">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="field-input"
+                placeholder="Repeat your password"
+                autoComplete="new-password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary btn-block"
+            >
+              {loading ? "Creating account..." : "Create Account"}
+            </button>
+          </form>
+
+          <p className="auth-footer">
+            Already registered?{" "}
+            <Link to="/login" className="auth-link">
+              Sign in
+            </Link>
+          </p>
+        </section>
+      </section>
 
       <div className="sr-only" role="status" aria-live="polite">
         {announce}
       </div>
-    </div>
+    </main>
   );
 }
